@@ -9,31 +9,77 @@ TOKEN :
 	< MINUS : "-" > |
 	< TIMES : "*" > |
 	< DIVIDE : "/" > |
+	< EQUALS : "=" > | 
+	< AND : "&" > |
+	< LESS : "<" > |
+	< NEGATION : "!" > |
 	< OPEN_PAREN : "(" > |
 	< CLOSE_PAREN : ")" > |
-	< INTEGER : (["0" - "9"])+ >
+	< INTEGER : (["0" - "9"])+ > | 
+	< IMPORT : "import" > |
+	< DOT : "." > |
+	< COMMA : "," > |
+	< SC : ";" > | 
+	< CLASS: "class" > |
+	< EXTENDS: "extends" > |
+	< OPEN_BRACES : "{" > |
+	< CLOSE_BRACES : "}" > |
+	< PUBLIC : "public" > |
+	< STATIC : "static" > |
+	< VOID : "void" > |
+	< MAIN : "main" > |
+	< OPEN_SQUARE : "[" > |
+	< CLOSE_SQUARE : "]" > |
+	< STRING : "String" > |
+	< RETURN : "return" > |
+	< INT : "int" > |
+	< BOOLEAN : "boolean" > | 
+	< IF : "if" > | 
+	< ELSE : "else" > |
+	< WHILE : "while" > |
+	< LENGTH : "length" > | 
+	< TRUE : "true" > | 
+	< FALSE : "false" > | 
+	< THIS : "this" > |
+	< NEW : "new" > | 
+	< IDENTIFIER : ["A"- "Z", "a" - "z"](["0" - "9", "A"- "Z", "a" - "z"])* > 
 ;
 
-Start : AdditiveExpression <EOF> ;
 
-AdditiveExpression :
-	MultiplicativeExpression
-	(
-		(< PLUS > | < MINUS >)
-		MultiplicativeExpression
-	)?
-;
+Program: ImportDeclaration ClassDeclaration < EOF >;
 
-MultiplicativeExpression :
-	Factor
-	(
-		(< TIMES > | < DIVIDE >)
-		Factor
-	)?
-;
+ImportDeclaration: (< IMPORT > < IDENTIFIER >  (< DOT > < IDENTIFIER > )* < SC >)* ;
 
-Factor :
-	< INTEGER > |
-	< MINUS> Factor |
-	< OPEN_PAREN > AdditiveExpression < CLOSE_PAREN >
-;
+ClassDeclaration: < CLASS > < IDENTIFIER >  (< EXTENDS > < IDENTIFIER > )? < OPEN_BRACES > (VarDeclaration)* (MethodDeclaration)* < CLOSE_BRACES >;
+
+VarDeclaration: Type < IDENTIFIER >  < SC >;
+
+MethodDeclaration: < PUBLIC > Type < IDENTIFIER >  < OPEN_PAREN > (Type < IDENTIFIER >  (< Comma > Type < IDENTIFIER > )*)? < CLOSE_PAREN > < OPEN_BRACES > (VarDeclaration)* (Statement)* < RETURN > Expression < SC > < CLOSE_BRACES > | 
+	< PUBLIC > < STATIC > < VOID > < MAIN > < OPEN_PAREN > < STRING > < OPEN_SQUARE > < CLOSE_SQUARE > < IDENTIFIER >  < CLOSE_PAREN > < OPEN_BRACES > (VarDeclaration)* (Statement)* < CLOSE_BRACES >;
+
+Type: 	< INT > < OPEN_SQUARE > < CLOSE_SQUARE > | 
+		< BOOLEAN > | 
+		< INT > | 
+		< IDENTIFIER > ;
+
+Statement:	< OPEN_BRACES > (Statement)* < CLOSE_BRACES > | 
+			< IF > < OPEN_PAREN > Expression < CLOSE_PAREN > Statement < ELSE > Statement |
+			< WHILE > < OPEN_PAREN > Expression < CLOSE_PAREN > Statement | 
+			Expression < SC > | 
+			< IDENTIFIER >  < EQUALS > Expression < SC > |
+			< IDENTIFIER >  < OPEN_SQUARE > Expression < CLOSE_SQUARE > < EQUALS > Expression < SC > ;
+
+Expression:	Expression (< AND > | < LESS > | < PLUS > | < MINUS > | < TIMES > | < DIVIDE >) Expression | 
+			Expression < OPEN_SQUARE > Expression < CLOSE_SQUARE > |
+			Expression < DOT > < LENGTH > | 
+			Expression < DOT > < IDENTIFIER >  < OPEN_PAREN > (Expression (< COMMA > Expression)*)? < CLOSE_PAREN > | 
+			< INTEGER > | 
+			< TRUE > | 
+			< FALSE > |
+			< IDENTIFIER >  |
+			< THIS > | 
+			< NEW > < INT > < OPEN_SQUARE > Expression < CLOSE_SQUARE > |
+			< NEW > < IDENTIFIER >  < OPEN_PAREN > < CLOSE_PAREN > |
+			< NEGATION > Expression | 
+			< OPEN_PAREN > Expression < CLOSE_PAREN > ;
+
