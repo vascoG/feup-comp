@@ -54,7 +54,7 @@ ClassDeclaration: < CLASS > < IDENTIFIER >  (< EXTENDS > < IDENTIFIER > )? < OPE
 
 VarDeclaration: Type < IDENTIFIER >  < SC >;
 
-MethodDeclaration: < PUBLIC > Type < IDENTIFIER >  < OPEN_PAREN > (Type < IDENTIFIER >  (< Comma > Type < IDENTIFIER > )*)? < CLOSE_PAREN > < OPEN_BRACES > (VarDeclaration)* (Statement)* < RETURN > Expression < SC > < CLOSE_BRACES > | 
+MethodDeclaration: < PUBLIC > Type < IDENTIFIER >  < OPEN_PAREN > (Type < IDENTIFIER >  (< COMMA > Type < IDENTIFIER > )*)? < CLOSE_PAREN > < OPEN_BRACES > (VarDeclaration)* (Statement)* < RETURN > Expression < SC > < CLOSE_BRACES > | 
 	< PUBLIC > < STATIC > < VOID > < MAIN > < OPEN_PAREN > < STRING > < OPEN_SQUARE > < CLOSE_SQUARE > < IDENTIFIER >  < CLOSE_PAREN > < OPEN_BRACES > (VarDeclaration)* (Statement)* < CLOSE_BRACES >;
 
 Type: 	< INT > < OPEN_SQUARE > < CLOSE_SQUARE > | 
