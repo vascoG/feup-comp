@@ -66,7 +66,7 @@ Argument: Type < IDENTIFIER > {jjtThis.put("name", lastConsumedToken.getImage())
 
 MethodBody: (SCAN 2 VarDeclaration)* (Statement)*;
 
-Type #void: 	< INT > (< OPEN_SQUARE > < CLOSE_SQUARE >)? | 
+Type: 	< INT > (< OPEN_SQUARE > < CLOSE_SQUARE >)? | 
 		< BOOLEAN > | 
 		< IDENTIFIER > {jjtThis.put("name", lastConsumedToken.getImage());};
 
@@ -77,7 +77,7 @@ Statement #void:	< OPEN_BRACES > (Statement)* < CLOSE_BRACES > |
 
 IfStatement #void: < IF > < OPEN_PAREN > Expression < CLOSE_PAREN > Statement #IfS < ELSE > Statement #ElseS ;
 
-WhileStatement: < WHILE > < OPEN_PAREN > Expression < CLOSE_PAREN > Statement ;
+WhileStatement #WhileStatement: < WHILE > < OPEN_PAREN > Expression < CLOSE_PAREN > Statement ;
 
 Expression #void:	ExpressionLess((< AND > ExpressionLess) #AndOp(2))*;
 
@@ -97,12 +97,12 @@ MethodCall: < IDENTIFIER > {jjtThis.put("name", lastConsumedToken.getImage());}<
 
 Parameter: Expression ( < COMMA > Expression)*;
 
-FinalTerm #void:	< INTEGER > {jjtThis.put("value", lastConsumedToken.getImage());} |
+FinalTerm #void:	< INTEGER > ({jjtThis.put("value", lastConsumedToken.getImage());}) #FTInt |
 			< TRUE > #FTTrue|
 			< FALSE > #FTFalse|
-			< IDENTIFIER > {jjtThis.put("name", lastConsumedToken.getImage());} |
+			< IDENTIFIER > ({jjtThis.put("name", lastConsumedToken.getImage());}) #FTIdentifier |
 			< THIS > #FTThis|
-			< NEW > (< INT > < OPEN_SQUARE > Expression < CLOSE_SQUARE > #Array| < IDENTIFIER > {jjtThis.put("name", lastConsumedToken.getImage());} < OPEN_PAREN > < CLOSE_PAREN > #Object) #FTNew(1)|
+			< NEW > (< INT > < OPEN_SQUARE > Expression < CLOSE_SQUARE > #Array | (< IDENTIFIER > ({jjtThis.put("name", lastConsumedToken.getImage());}) < OPEN_PAREN > < CLOSE_PAREN >) #Object) #FTNew(1)|
 			< OPEN_PAREN > Expression < CLOSE_PAREN > ;
 
 
@@ -133,6 +133,7 @@ INJECT BaseNode :
 
     }
 }
+
 
 // Injections for the implementation of JmmNode
 // Since this is injected into Token, it affects only terminals
