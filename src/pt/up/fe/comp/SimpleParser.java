@@ -33,34 +33,7 @@ public class SimpleParser implements JmmParser {
     @Override
     public JmmParserResult parse(String jmmCode, Map<String, String> config) {
 
-        try {
-
-            JmmGrammarParser parser = new JmmGrammarParser(SpecsIo.toInputStream(jmmCode));
-            parser.Program();
-
-            var root = ((JmmNode) parser.rootNode()).sanitize();
-            System.out.println(root.toTree());
-
-            if (!(root instanceof JmmNode)) {
-                return JmmParserResult.newError(new Report(ReportType.WARNING, Stage.SYNTATIC, -1,
-                        "JmmNode interface not yet implemented, returning null root node"));
-            }
-
-            return new JmmParserResult((JmmNode) root, Collections.emptyList(), config);
-
-        } catch (Exception ex) {
-
-            var e = TestUtils.getException(ex, ParseException.class);
-            if(e==null)
-                return JmmParserResult.newError(Report.newError(Stage.SYNTATIC, -1, -1, "Exception during parsing", ex));
-            Token t = e.getToken();
-            int line = t.getBeginLine();
-            int column = t.getBeginColumn();
-            String message = e.getMessage();
-            Report report = Report.newError(Stage.SYNTATIC, line, column, message, e);
-            return JmmParserResult.newError(report);
-
-        }
+        return parse(jmmCode, "Program", config);
     }
     @Override
     public JmmParserResult parse(String jmmCode, String startingRule, Map<String, String> config) {
