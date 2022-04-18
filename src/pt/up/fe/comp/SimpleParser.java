@@ -48,8 +48,18 @@ public class SimpleParser implements JmmParser {
 
             return new JmmParserResult((JmmNode) root, Collections.emptyList(), config);
 
-        } catch (Exception e) {
-            return JmmParserResult.newError(Report.newError(Stage.SYNTATIC, -1, -1, "Exception during parsing", e));
+        } catch (Exception ex) {
+
+            var e = TestUtils.getException(ex, ParseException.class);
+            if(e==null)
+                return JmmParserResult.newError(Report.newError(Stage.SYNTATIC, -1, -1, "Exception during parsing", ex));
+            Token t = e.getToken();
+            int line = t.getBeginLine();
+            int column = t.getBeginColumn();
+            String message = e.getMessage();
+            Report report = Report.newError(Stage.SYNTATIC, line, column, message, e);
+            return JmmParserResult.newError(report);
+
         }
     }
     @Override
@@ -74,17 +84,18 @@ public class SimpleParser implements JmmParser {
             return new JmmParserResult((JmmNode) root, Collections.emptyList(), config);
 
         }
-        catch (ParseException e)
-        {
+        catch (Exception ex) {
+
+            var e = TestUtils.getException(ex, ParseException.class);
+            if(e==null)
+                return JmmParserResult.newError(Report.newError(Stage.SYNTATIC, -1, -1, "Exception during parsing", ex));
             Token t = e.getToken();
             int line = t.getBeginLine();
             int column = t.getBeginColumn();
             String message = e.getMessage();
             Report report = Report.newError(Stage.SYNTATIC, line, column, message, e);
             return JmmParserResult.newError(report);
-        } 
-        catch (Exception e) {
-            return JmmParserResult.newError(Report.newError(Stage.SYNTATIC, -1, -1, "Exception during parsing", e));
+
         }
     }
 }
