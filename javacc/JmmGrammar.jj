@@ -69,9 +69,10 @@ MethodBody: (SCAN 2 VarDeclaration)* (Statement)*;
 
 Type: 	< INT > ({jjtThis.put("name", lastConsumedToken.getImage());jjtThis.put("isArray", "false");})(< OPEN_SQUARE > < CLOSE_SQUARE > ({jjtThis.put("isArray", "true");}))? | 
 		< BOOLEAN > ({jjtThis.put("name", lastConsumedToken.getImage());jjtThis.put("isArray", "false");})| 
+		< STRING > ({jjtThis.put("name", lastConsumedToken.getImage());jjtThis.put("isArray", "false");}) |
 		< IDENTIFIER > {jjtThis.put("name", lastConsumedToken.getImage()); jjtThis.put("isArray", "false");};
 
-Statement #void:	< OPEN_BRACES > (Statement)* < CLOSE_BRACES > | 
+Statement #void:	(< OPEN_BRACES > (Statement)* < CLOSE_BRACES >)#CompoundStatement | 
 			IfStatement |
 			WhileStatement | 
 			Expression (< EQUALS > Expression #Assignment(2))? < SC >;
