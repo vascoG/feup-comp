@@ -1,4 +1,4 @@
-package pt.up.fe.comp;
+package pt.up.fe.comp.Parser;
 
 import java.util.Collections;
 import java.util.Map;
@@ -6,6 +6,7 @@ import java.util.Map;
 import com.javacc.parser.ParseException;
 import com.javacc.parser.Token;
 
+import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.parser.JmmParser;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;

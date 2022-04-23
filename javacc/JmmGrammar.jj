@@ -1,4 +1,4 @@
-PARSER_PACKAGE=pt.up.fe.comp;
+PARSER_PACKAGE=pt.up.fe.comp.Parser;
 PARSER_CLASS=JmmGrammarParser;
 SMART_NODE_CREATION=false;
 TOKENS_ARE_NODES=false;

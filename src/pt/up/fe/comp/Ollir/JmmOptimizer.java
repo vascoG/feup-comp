@@ -1,4 +1,4 @@
-package pt.up.fe.comp;
+package pt.up.fe.comp.Ollir;
 
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
