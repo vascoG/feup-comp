@@ -59,7 +59,7 @@ VarDeclaration: Type < IDENTIFIER >  {jjtThis.put("name", lastConsumedToken.getI
 
 MethodDeclaration #void: < PUBLIC > (MainMethodDeclaration | OtherMethodDeclaration) ;
 
-MainMethodDeclaration: 	< STATIC > < VOID > < MAIN > < OPEN_PAREN > < STRING > < OPEN_SQUARE > < CLOSE_SQUARE > < IDENTIFIER > < CLOSE_PAREN > < OPEN_BRACES > MethodBody < CLOSE_BRACES >;
+MainMethodDeclaration: 	< STATIC > < VOID > < MAIN > < OPEN_PAREN > < STRING > < OPEN_SQUARE > < CLOSE_SQUARE > < IDENTIFIER > ({jjtThis.put("argument", lastConsumedToken.getImage());})< CLOSE_PAREN > < OPEN_BRACES > MethodBody < CLOSE_BRACES >;
 
 OtherMethodDeclaration: Type < IDENTIFIER >  {jjtThis.put("name", lastConsumedToken.getImage());}< OPEN_PAREN > (Argument  (< COMMA > Argument )*)? < CLOSE_PAREN > < OPEN_BRACES > MethodBody < RETURN > Expression #ReturnExpression  	< SC > < CLOSE_BRACES > ;
 
