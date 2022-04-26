@@ -1,7 +1,8 @@
 package pt.up.fe.comp.SymbolTable; 
 
-import java.util.Collections; 
+import java.util.Collections;
 
+import pt.up.fe.comp.SemanticAnalysis.SemanticAnalysisVisitor;
 import pt.up.fe.comp.jmm.analysis.JmmAnalysis; 
 
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
@@ -21,6 +22,9 @@ public class JmmAnalyser implements JmmAnalysis {
         visitor.visit(node);
 
         JmmSymbolTable symbolTable = visitor.getSymbolTable();
+
+        SemanticAnalysisVisitor semanticVisitor = new SemanticAnalysisVisitor(symbolTable);
+        semanticVisitor.visit(node);
 
         return new JmmSemanticsResult(parserResult, symbolTable, Collections.emptyList()); 
     } 
