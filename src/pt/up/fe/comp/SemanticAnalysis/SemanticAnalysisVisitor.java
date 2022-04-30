@@ -7,6 +7,8 @@ import pt.up.fe.comp.SymbolTable.JmmSymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
+import pt.up.fe.comp.jmm.report.Stage;
 
 public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean>  {
     private final JmmSymbolTable symbolTable;
@@ -20,21 +22,15 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         addVisit("IFElseBlock", this::visitIfStatement);
     }
 
-    public Boolean visitStatement(JmmNode node){
-        return true;
-    }
-
     public Boolean visitIfStatement(JmmNode node, Boolean dummy) {
 
         List<JmmNode> children = node.getChildren();
         for (JmmNode child : children)
         {
             if (child.getKind().equals("IfCondition")){
-                List<JmmNode> conditionChildren = node.getChildren();
-                for (JmmNode conditionChild : conditionChildren)
-                    SemanticUtils.isBoolean(symbolTable, conditionChild, reports);
+                    if(!SemanticUtils.isBoolean(symbolTable, child.getJmmChild(0), reports))
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on If Condition: Must be a boolean!"));
             }
-            else {visitStatement(node);}
         }
 
         return true;

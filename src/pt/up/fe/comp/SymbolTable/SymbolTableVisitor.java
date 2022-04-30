@@ -57,7 +57,15 @@ public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
     {
         StringBuilder importString = new StringBuilder(node.get("name"));
         for (JmmNode child : node.getChildren())
+        {   
+            
             importString.append(child.get("name"));
+            for (JmmNode childImport : child.getChildren())
+                {
+                    importString.append(".");
+                    importString.append(childImport.get("name"));
+                }
+        }
         symbolTable.addImport(importString.toString());
 
         return true;
@@ -75,7 +83,11 @@ public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
     public Boolean visitOtherMethod(JmmNode node, Boolean dummy)
     {
         JmmNode returnNode = node.getJmmChild(0);
-        Type returnType = new Type(returnNode.get("name"),Boolean.parseBoolean(returnNode.get("isArray")));
+        Type returnType;
+        if(returnNode.getKind().equals("Type"))
+            returnType = new Type(returnNode.get("name"),Boolean.parseBoolean(returnNode.get("isArray")));
+        else
+            returnType = new Type("void", false);
         String name = node.get("name");
 
         List<JmmNode> argumentsNodes = node.getChildren().stream().filter(c->c.getKind().equals("Argument")).collect(Collectors.toList());
