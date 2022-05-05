@@ -44,7 +44,7 @@ public class SimpleParser implements JmmParser {
             JmmGrammarParser parser = new JmmGrammarParser(SpecsIo.toInputStream(jmmCode));
             SpecsSystem.invoke(parser, startingRule);
 
-            Node root = parser.rootNode();
+            var root = parser.rootNode();
             System.out.println(((JmmNode) root).sanitize().toTree());
 
             if (!(root instanceof JmmNode)) {
