@@ -26,7 +26,6 @@ import pt.up.fe.comp.Jasmin.JmmBackend;
 import pt.up.fe.comp.jmm.jasmin.JasminBackend;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
-import pt.up.fe.comp.jmm.ollir.OllirUtils;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsStrings;
 
@@ -37,7 +36,8 @@ public class BackendTest {
     String result = SpecsIo.getResource("fixtures/public/ollir/myclass3.ollir");
     JasminBackend jb = new JmmBackend();
     JasminResult js = jb.toJasmin(new OllirResult(result,Collections.emptyMap()));
-    System.out.println(js.getJasminCode());
+
+    js.run();
     }
 
     @Test

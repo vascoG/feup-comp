@@ -3,6 +3,7 @@ package pt.up.fe.comp.Jasmin;
 import org.specs.comp.ollir.AccessModifiers;
 import org.specs.comp.ollir.ClassUnit;
 import org.specs.comp.ollir.Element;
+import org.specs.comp.ollir.ElementType;
 import org.specs.comp.ollir.Field;
 import org.specs.comp.ollir.Instruction;
 import org.specs.comp.ollir.Method;
@@ -29,9 +30,9 @@ public class JasminBuilder {
     private void addMethods() {
         for(Method method : classUnit.getMethods())
         { 
-            jasminCode.append(".method public ");
+            jasminCode.append("\n.method public ");
             if(method.isConstructMethod())
-                jasminCode.append("<init> ");
+                jasminCode.append("<init>");
             else
             {
                 if(method.isStaticMethod()) jasminCode.append("static ");
@@ -42,25 +43,26 @@ public class JasminBuilder {
             jasminCode.append("(");
 
             for(Element param : method.getParams())
-                JasminUtils.getJasminType(param.getType());
+                jasminCode.append(JasminUtils.getJasminType(param.getType()));
 
             jasminCode.append(")");
             jasminCode.append(JasminUtils.getJasminType(method.getReturnType()));
             jasminCode.append("\n");
 
-            if(!method.isConstructMethod())
-                {
-                    jasminCode.append("limit locals 99\n");
-                    jasminCode.append("limit stack 99\n");
-                }
-
+            jasminCode.append(".limit locals 99\n");
+            jasminCode.append(".limit stack 99\n");
+            
             for(Instruction instruction : method.getInstructions())
             { 
                 for (String label : method.getLabels(instruction))
-                    jasminCode.append(label).append("\n");
+                    jasminCode.append(label).append(":\n");
 
                 jasminCode.append(JasminUtils.getInstructionCode(instruction, method));
             } 
+
+            if(method.getReturnType().getTypeOfElement()==ElementType.VOID)
+                jasminCode.append("return\n");
+
             jasminCode.append(".end method\n");
         }
     }
@@ -99,7 +101,7 @@ public class JasminBuilder {
 
         jasminCode.append(".super ");
         jasminCode.append(superClassName);
-        jasminCode.append("\n");
+        jasminCode.append("\n\n");
     }
 
     private void addClassName() {

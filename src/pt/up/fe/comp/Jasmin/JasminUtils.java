@@ -8,20 +8,25 @@ import org.specs.comp.ollir.ArrayType;
 import org.specs.comp.ollir.AssignInstruction;
 import org.specs.comp.ollir.CallInstruction;
 import org.specs.comp.ollir.ClassType;
+import org.specs.comp.ollir.ClassUnit;
 import org.specs.comp.ollir.Descriptor;
 import org.specs.comp.ollir.Element;
 import org.specs.comp.ollir.ElementType;
+import org.specs.comp.ollir.GetFieldInstruction;
 import org.specs.comp.ollir.Instruction;
 import org.specs.comp.ollir.LiteralElement;
 import org.specs.comp.ollir.Method;
 import org.specs.comp.ollir.Operand;
 import org.specs.comp.ollir.PutFieldInstruction;
+import org.specs.comp.ollir.ReturnInstruction;
 import org.specs.comp.ollir.SingleOpInstruction;
 import org.specs.comp.ollir.Type;
 
 import pt.up.fe.comp.Jasmin.Instructions.JasminAssignInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminPutFieldInstruction;
+import pt.up.fe.comp.Jasmin.Instructions.JasminReturnInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminCallInstruction;
+import pt.up.fe.comp.Jasmin.Instructions.JasminGetFieldInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminSingleOpInstruction;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
@@ -48,30 +53,42 @@ public class JasminUtils {
             case ARRAYREF: return getJasminArrayType((ArrayType)type);
             case THIS: return JasminBuilder.classUnit.getClassName();
             case CLASS: return ((ClassType)type).getName();
-            case OBJECTREF: return ((ClassType)type).getName();
-            default: return getJasminType(type.getTypeOfElement());
+            case INT32: return "I";
+            case BOOLEAN: return "Z";
+            case STRING: return "Ljava/lang/String;";
+            case VOID: return "V";
+            case OBJECTREF: return getJasminObjectType((ClassType)type);
+            default: throw new NotImplementedException(type.getTypeOfElement());
+            
         }
 
+    }
+
+    private static String getJasminObjectType(ClassType type) {
+        StringBuilder sb = new StringBuilder();
+        for(String imports : JasminBuilder.classUnit.getImports())
+        {
+            if(imports.endsWith(type.getName()))
+                { 
+                    sb.append("L").append(imports.replace('.', '/')).append(";");
+                    return sb.toString();
+                }
+        }
+        sb.append("L").append(type.getName()).append(";");
+        return sb.toString();
     }
 
     private static String getJasminArrayType(ArrayType type) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("[".repeat(type.getNumDimensions()));
-        sb.append(getJasminType(type.getTypeOfElements()));
+        
+        if(type.getTypeOfElements()==ElementType.INT32)
+            sb.append("I");
+        else
+            sb.append("Ljava/lang/String;");
 
         return sb.toString();
-    }
-
-    public static String getJasminType(ElementType type){
-        switch (type) {
-            case INT32: return "I";
-            case BOOLEAN: return "Z";
-            case STRING: return "Ljava/lang/String;";
-            case VOID: return "V";
-            default: return "";
-        }
-
     }
 
     public static String getInstructionCode(Instruction instruction, Method method)
@@ -85,12 +102,16 @@ public class JasminUtils {
             return JasminSingleOpInstruction.getInstructionCode((SingleOpInstruction)instruction, method);
         case PUTFIELD:
             return JasminPutFieldInstruction.getInstructionCode((PutFieldInstruction)instruction,method);
+        case GETFIELD:
+            return JasminGetFieldInstruction.getInstructionCode((GetFieldInstruction)instruction,method);
+        case RETURN:
+            return JasminReturnInstruction.getInstructionCode((ReturnInstruction)instruction, method);
         default: throw new NotImplementedException(instruction.getInstType());
     }
     }
 
     public static String getArrayLengthCode(int reg){
-        return aload(reg) + "arraylength \n";
+        return aload(reg) + "arraylength\n";
     }
 
     private static String aload(int reg) {
@@ -171,6 +192,12 @@ public class JasminUtils {
         sb.append(aload(arrayReg)).append(iload(indexReg)).append("iastore\n");
 
         return sb.toString();
+    }
+
+    public static String getName(String string, Method method) {
+        if(string.equals("this"))
+            return method.getOllirClass().getClassName();
+        return string;
     }
 
     

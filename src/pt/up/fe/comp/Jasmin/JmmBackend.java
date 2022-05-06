@@ -29,7 +29,8 @@ public class JmmBackend implements JasminBackend{
         classUnit.buildVarTables();
         classUnit.show();
 
-        String jasminCode = new JasminBuilder(classUnit).generateJasminCode();
+        JasminBuilder jb = new JasminBuilder(classUnit);
+        String jasminCode = jb.generateJasminCode();
 
         System.out.println(jasminCode);
 
