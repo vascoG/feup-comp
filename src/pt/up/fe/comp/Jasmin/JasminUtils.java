@@ -6,6 +6,7 @@ import org.specs.comp.ollir.AccessModifiers;
 import org.specs.comp.ollir.ArrayOperand;
 import org.specs.comp.ollir.ArrayType;
 import org.specs.comp.ollir.AssignInstruction;
+import org.specs.comp.ollir.BinaryOpInstruction;
 import org.specs.comp.ollir.CallInstruction;
 import org.specs.comp.ollir.ClassType;
 import org.specs.comp.ollir.ClassUnit;
@@ -17,12 +18,14 @@ import org.specs.comp.ollir.Instruction;
 import org.specs.comp.ollir.LiteralElement;
 import org.specs.comp.ollir.Method;
 import org.specs.comp.ollir.Operand;
+import org.specs.comp.ollir.OperationType;
 import org.specs.comp.ollir.PutFieldInstruction;
 import org.specs.comp.ollir.ReturnInstruction;
 import org.specs.comp.ollir.SingleOpInstruction;
 import org.specs.comp.ollir.Type;
 
 import pt.up.fe.comp.Jasmin.Instructions.JasminAssignInstruction;
+import pt.up.fe.comp.Jasmin.Instructions.JasminBinaryOperInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminPutFieldInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminReturnInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminCallInstruction;
@@ -106,6 +109,8 @@ public class JasminUtils {
             return JasminGetFieldInstruction.getInstructionCode((GetFieldInstruction)instruction,method);
         case RETURN:
             return JasminReturnInstruction.getInstructionCode((ReturnInstruction)instruction, method);
+        case BINARYOPER:
+            return JasminBinaryOperInstruction.getInstructionCode((BinaryOpInstruction)instruction, method);
         default: throw new NotImplementedException(instruction.getInstType());
     }
     }
@@ -198,6 +203,20 @@ public class JasminUtils {
         if(string.equals("this"))
             return method.getOllirClass().getClassName();
         return string;
+    }
+
+    public static String getOperationCode(OperationType opType) {
+        switch (opType) {
+            case ADD:
+                return "iadd";
+            case MUL:
+                return "imul";
+            case SUB:
+                return "isub";
+            case DIV:
+                return "idiv";
+            default:
+                throw new NotImplementedException(opType);
     }
 
     
