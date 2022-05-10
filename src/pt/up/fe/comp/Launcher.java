@@ -64,6 +64,13 @@ public class Launcher {
         JmmOptimizer optimizer = new JmmOptimizer();
 
         // Optimization stage
+        optimizationResult = optimizer.optimize(analysisResult);
+
+        // Check if there are parsing errors 
+        TestUtils.noErrors(optimizationResult.getReports());
+
+
+        // Optimization stage
         OllirResult ollirResult = optimizer.toOllir(analysisResult);
 
         // Check if there are parsing errors 
