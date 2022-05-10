@@ -59,7 +59,7 @@ public class Launcher {
         // Check if there are parsing errors 
         TestUtils.noErrors(analysisResult.getReports());
 
-        /*
+        
         // Instantiate JmmOptimizer
         JmmOptimizer optimizer = new JmmOptimizer();
 
@@ -79,7 +79,7 @@ public class Launcher {
         TestUtils.noErrors(jasminResult.getReports());
 
 
-        // ... add remaining stages*/
+        // ... add remaining stages
     }
 
 }

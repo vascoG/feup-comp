@@ -20,6 +20,7 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         this.reports = new ArrayList<>();
 
         addVisit("IFElseBlock", this::visitIfStatement);
+        addVisit("WhileBlock", this::visitWhileStatement);
     }
 
     public Boolean visitIfStatement(JmmNode node, Boolean dummy) {
@@ -30,6 +31,20 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
             if (child.getKind().equals("IfCondition")){
                     if(!SemanticUtils.isBoolean(symbolTable, child.getJmmChild(0), reports))
                         reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on If Condition: Must be a boolean!"));
+            }
+        }
+
+        return true;
+    }
+
+    public Boolean visitWhileStatement(JmmNode node, Boolean dummy) {
+
+        List<JmmNode> children = node.getChildren();
+        for (JmmNode child : children)
+        {
+            if (child.getKind().equals("WhileCondition")){
+                    if(!SemanticUtils.isBoolean(symbolTable, child.getJmmChild(0), reports))
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on While Condition: Must be a boolean!"));
             }
         }
 
