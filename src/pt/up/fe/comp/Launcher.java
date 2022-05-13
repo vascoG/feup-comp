@@ -59,16 +59,16 @@ public class Launcher {
         // Check if there are parsing errors 
         TestUtils.noErrors(analysisResult.getReports());
 
-        /*
         // Instantiate JmmOptimizer
         JmmOptimizer optimizer = new JmmOptimizer();
 
         // Optimization stage
-        OllirResult ollirResult = optimizer.toOllir(analysisResult);
+        var ollirResult = optimizer.optimize(analysisResult);
 
         // Check if there are parsing errors 
-        TestUtils.noErrors(ollirResult.getReports());
-
+        TestUtils.noErrors(ollirResult);
+        
+/*
         // Instantiate JmmBackend
         JmmBackend backend = new JmmBackend();
 
