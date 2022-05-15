@@ -26,7 +26,10 @@ public class JmmAnalyser implements JmmAnalysis {
         SemanticAnalysisVisitor semanticVisitor = new SemanticAnalysisVisitor(symbolTable);
         semanticVisitor.visit(node);
 
-        return new JmmSemanticsResult(parserResult, symbolTable, Collections.emptyList()); 
+        System.out.println( symbolTable.print());
+       
+
+        return new JmmSemanticsResult(parserResult, symbolTable, semanticVisitor.getReports()); 
     } 
 
 }

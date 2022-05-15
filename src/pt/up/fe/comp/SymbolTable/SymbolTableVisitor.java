@@ -46,7 +46,7 @@ public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
         for(JmmNode fieldNode : fieldsNodes)
         {
             JmmNode typeNode = fieldNode.getJmmChild(0);
-            Type type = new Type(typeNode.get("name"), Boolean.parseBoolean(typeNode.get("isArray")));
+            Type type = new Type(typeNode.get("name"), parseBoolean(typeNode.get("isArray")));
             symbolTable.addField(type, fieldNode.get("name"));
         }
         
@@ -75,8 +75,22 @@ public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
     {
         List <Symbol> param = new ArrayList<Symbol>();
         param.add(new Symbol(new Type("String", true), node.get("argument")));
-        symbolTable.addMethod( new Type("void",false), "main", param);
 
+        JmmMethod method = new JmmMethod("main", new Type("void",false), param);
+
+        for (var child:node.getChildren())
+        {
+            if(child.getKind().equals("MethodBody"))
+            { 
+                for(var childBody:child.getChildren())
+                {
+                    if(childBody.getKind().equals("VarDeclaration"))
+                        method.addLocalVariable(new Type(childBody.getJmmChild(0).get("name"), parseBoolean(childBody.getJmmChild(0).get("isArray"))), childBody.get("name"));
+                }
+            }
+        }
+
+        symbolTable.addMethod(method);
         return true;
     }
 
@@ -85,7 +99,7 @@ public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
         JmmNode returnNode = node.getJmmChild(0);
         Type returnType;
         if(returnNode.getKind().equals("Type"))
-            returnType = new Type(returnNode.get("name"),Boolean.parseBoolean(returnNode.get("isArray")));
+            returnType = new Type(returnNode.get("name"),parseBoolean(returnNode.get("isArray")));
         else
             returnType = new Type("void", false);
         String name = node.get("name");
@@ -95,12 +109,32 @@ public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
         for(JmmNode argumentNode : argumentsNodes)
         {
             JmmNode typeNode = argumentNode.getJmmChild(0);
-            Type type = new Type(typeNode.get("name"), Boolean.parseBoolean(typeNode.get("isArray")));
+            Type type = new Type(typeNode.get("name"), parseBoolean(typeNode.get("isArray")));
             arguments.add(new Symbol(type, argumentNode.get("name")));
         }
-        symbolTable.addMethod(returnType, name, arguments);
 
+        JmmMethod method = new JmmMethod(name, returnType, arguments);
+        for (var child:node.getChildren())
+        {
+            if(child.getKind().equals("MethodBody"))
+            { 
+                for(var childBody:child.getChildren())
+                {
+                    if(childBody.getKind().equals("VarDeclaration")){
+                        method.addLocalVariable(new Type(childBody.getJmmChild(0).get("name"), parseBoolean(childBody.getJmmChild(0).get("isArray"))), childBody.get("name"));
+                }}
+            }
+        }
+
+        symbolTable.addMethod(method);
         return true;
+    }
+
+    private boolean parseBoolean(String string) {
+        if(string.equals("false"))
+            return false;
+        else
+            return true;
     }
     
 }

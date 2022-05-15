@@ -17,9 +17,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.Collections;
 
 import org.junit.Test;
-import org.specs.comp.ollir.ClassUnit;
-import org.specs.comp.ollir.OllirErrorException;
-import org.specs.comp.ollir.parser.OllirParser;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.Jasmin.JmmBackend;
