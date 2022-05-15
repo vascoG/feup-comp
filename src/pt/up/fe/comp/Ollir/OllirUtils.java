@@ -2,6 +2,7 @@ package pt.up.fe.comp.Ollir;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
+import pt.up.fe.comp.jmm.ast.JmmNode;
 
 public class OllirUtils {
 
@@ -30,4 +31,10 @@ public class OllirUtils {
                 return jmmType;
         }
     }
+
+    //funçao para devolver o tipo através da expressao
+    public static String TypeExpress(JmmNode exprStmt){
+        return "0";
+    }
 }
+
