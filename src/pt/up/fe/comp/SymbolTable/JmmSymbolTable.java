@@ -80,5 +80,9 @@ public class JmmSymbolTable implements SymbolTable {
     public List<Symbol> getLocalVariables(String methodSignature) {
         return methods.get(methodSignature).getLocalVariables();
     }
+
+    public void addMethod(JmmMethod method) {
+        methods.put(method.getName(), method);
+    }
     
 }

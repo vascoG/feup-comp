@@ -29,7 +29,7 @@ public class JmmAnalyser implements JmmAnalysis {
         System.out.println( symbolTable.print());
        
 
-        return new JmmSemanticsResult(parserResult, symbolTable, Collections.emptyList()); 
+        return new JmmSemanticsResult(parserResult, symbolTable, semanticVisitor.getReports()); 
     } 
 
 }

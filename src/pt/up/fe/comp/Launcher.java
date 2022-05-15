@@ -64,10 +64,10 @@ public class Launcher {
         JmmOptimizer optimizer = new JmmOptimizer();
 
         // Optimization stage
-        var ollirResult = optimizer.optimize(analysisResult);
+        OllirResult ollirResult = optimizer.toOllir(analysisResult);
 
         // Check if there are parsing errors 
-        TestUtils.noErrors(ollirResult);
+        TestUtils.noErrors(ollirResult.getReports());
 
         // Instantiate JmmBackend
         JmmBackend backend = new JmmBackend();
