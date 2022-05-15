@@ -15,11 +15,11 @@ public class OllirGenerator extends AJmmVisitor<Integer, Integer> {
         this.code = new StringBuilder();
         this.symbolTable = symbolTable;
 
-        addVisit(AstNode.PROGRAM, this::programVisit);
-        addVisit(AstNode.CLASS_DECL, this::classDeclVisit);
-        addVisit(AstNode.METHOD_DECL, this::methodDeclVisit);
-        addVisit(AstNode.EXPR_STMT, this::exprStmtVisit); //2:29:55
-        addVisit(AstNode.MEMBER_CALL, this::memberCallVisit); //2:39:24
+        addVisit("Program", this::programVisit);
+        addVisit("ClassDeclaration", this::classDeclVisit);
+        addVisit("MethodDeclaration", this::methodDeclVisit);
+        addVisit("Expression", this::exprStmtVisit); //2:38:20
+        addVisit("MemberCall", this::memberCallVisit); //2:39:24
     }
 
     public String getCode(){
@@ -98,8 +98,6 @@ public class OllirGenerator extends AJmmVisitor<Integer, Integer> {
 
         code.append("}\n");
 
-        //.method public static main(args.array.String).V{
-
         return 0;
     }
 
@@ -110,6 +108,8 @@ public class OllirGenerator extends AJmmVisitor<Integer, Integer> {
         return 0;
     }
 
+    //2:41:50
+    //2:43:10
     private Integer memberCallVisit(JmmNode memberCall, Integer dummy){
         visit(memberCall.getJmmChild(0));
         code.append(".").append(memberCall.getJmmChild(1)).append("(");
