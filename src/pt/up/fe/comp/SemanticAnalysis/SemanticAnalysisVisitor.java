@@ -136,5 +136,18 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         return true;
     }
     
+    public void visitReturn(GrammarMethod method, JmmNode node){
+
+        List<JmmNode> children = node.getChildren().get(0);
+        GrammarType type = SemanticUtils.getNodeType(symbolTable, node, reports);
+
+        if(type == null){
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1, "Error on Return: unexpected type"));
+            return; 
+        }
+        if(!type.equals(method.getReturnType())){
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1, "Error on Return: unexpected type, should be " + method.getReturnType().printType() + " but it is " + type.printType()));
+        }
+    }
    
 }
