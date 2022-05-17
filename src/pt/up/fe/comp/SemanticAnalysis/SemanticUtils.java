@@ -1,5 +1,7 @@
 package pt.up.fe.comp.SemanticAnalysis;
 
+import static org.junit.Assert.fail;
+
 import java.util.List;
 
 import pt.up.fe.comp.SymbolTable.JmmSymbolTable;
@@ -56,6 +58,8 @@ public class SemanticUtils {
 
     public static boolean sameType(Type type, Type type2) {
 
+        if(type==null || type2==null)
+            return false;
         if (type.getName().equals(type2.getName()) && type.isArray()==type2.isArray())
             return true;
             
@@ -112,7 +116,8 @@ public class SemanticUtils {
 }
 
     public static String getParentMethod(JmmNode node) {
-        while(!node.getKind().equals("OtherMethodDeclaration") && !node.getKind().equals("MainDeclaration"))
+
+        while(!node.getKind().equals("OtherMethodDeclaration") && !node.getKind().equals("MainMethodDeclaration"))
             node = node.getJmmParent();
 
         if(node.getKind().equals("OtherMethodDeclaration"))

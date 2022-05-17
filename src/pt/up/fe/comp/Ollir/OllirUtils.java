@@ -1,5 +1,9 @@
 package pt.up.fe.comp.Ollir;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
