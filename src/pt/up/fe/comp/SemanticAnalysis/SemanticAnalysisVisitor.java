@@ -5,6 +5,7 @@ import java.util.List;
 
 import freemarker.core.builtins.sourceBI;
 import pt.up.fe.comp.SymbolTable.JmmSymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
@@ -31,10 +32,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         addVisit("LessOp", this::visitBooleanOperations);
         addVisit("AndOp", this::visitBooleanOperations);
         addVisit("Neg", this::visitNotOperations);
-
-
-
-
+        addVisit("ReturnExpression",this::visitReturn);
+        addVisit("Call", this::visitCall);
+        addVisit("Array", this::visitNewArray);
+        addVisit("ArrayIndex", this::visitArrayIndex);    
     }
 
     public List<Report> getReports() {
@@ -136,18 +137,99 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         return true;
     }
     
-    public void visitReturn(GrammarMethod method, JmmNode node){
+    public Boolean visitReturn(JmmNode node, Boolean dummy){
 
-        List<JmmNode> children = node.getChildren().get(0);
-        GrammarType type = SemanticUtils.getNodeType(symbolTable, node, reports);
+       Type type = SemanticUtils.getNodeType(symbolTable, node.getJmmChild(0), reports);
 
-        if(type == null){
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1, "Error on Return: unexpected type"));
-            return; 
+        if(type == null)
+            return true;
+        String method = SemanticUtils.getParentMethod(node);
+        Type realType = symbolTable.getReturnType(method);
+
+        if(type.getName().equals(symbolTable.getClassName()) && realType.getName().equals(symbolTable.getSuper()))
+            return true;
+
+        if(symbolTable.getImports().contains(type.getName()) && symbolTable.getImports().contains(realType.getName()))
+            return true;
+
+        if(!SemanticUtils.sameType(type, realType))
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on Return: Different types: "+type + " and "+ realType));
+
+
+        return true;
         }
-        if(!type.equals(method.getReturnType())){
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1, "Error on Return: unexpected type, should be " + method.getReturnType().printType() + " but it is " + type.printType()));
+
+        public Boolean visitCall(JmmNode node, Boolean dummy) {
+            if(node.getNumChildren()!=2)
+                    reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on MethodCall: Wrong number of operands!"));
+        
+            var methodCall = node.getJmmChild(1);
+            if(methodCall.getKind().equals("MethodCall"))
+            { 
+                //caso exista na tabela, confirmar argumentos, senao assumir que argumentos estao bem
+                if(symbolTable.getMethods().contains(methodCall.get("name"))){
+                    List<Symbol> params = symbolTable.getParameters(methodCall.get("name"));
+                    if(params.size()!=methodCall.getNumChildren())
+                    {
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1, "Error on Method: wrong number of parameters!"));
+                        return true;
+                    }
+                    int index = 0;
+                    for(Symbol param : params)
+                    {  
+                        Type typeParam = SemanticUtils.getNodeType(symbolTable, methodCall.getJmmChild(index), reports);
+                        if(!SemanticUtils.sameType(param.getType(), typeParam) )
+                            {
+                                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1, "Error on Method: wrong type of parameter!"));
+                                return true;
+                            }
+                    }
+                    return true;
+                }
+
+                Type type = SemanticUtils.getNodeType(symbolTable, node.getJmmChild(0), reports);
+                if(type!=null){
+
+                    //verificar se a classe extende alguma coisa e se foi chamado um método num objeto da classe
+                    if(type.getName().equals(symbolTable.getClassName()) && symbolTable.getSuper()!=null)
+                        return true;
+                        
+                    //verificar se há imports que sejam igual ao objeto onde está a ser chamado o método
+                    else if(symbolTable.getImports().contains(type.getName()))
+                        return true;
+                }
+                
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1, "Error on Method: unexisting method"));
+    
+            }
+    
+            //length only on array
+    
+            return true;
         }
-    }
-   
+        public Boolean visitArrayIndex(JmmNode node, Boolean dummy) {
+            if(node.getNumChildren()!=2)
+                    reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on ArrayIndex: Wrong number of operands!"));
+        
+            
+            Type left = SemanticUtils.getNodeType(symbolTable, node.getJmmChild(0), reports);
+            if(left == null)
+                 return true;
+            if(!SemanticUtils.sameType(left, new Type("int", true)))
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on ArrayIndex: Not accessing an array!"));
+            if(!SemanticUtils.isInteger(symbolTable, node.getJmmChild(1), reports))
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on ArrayIndex: Index must be a Integer!"));
+    
+            return true;
+        }
+    
+        public Boolean visitNewArray(JmmNode node, Boolean dummy) {
+            if(node.getNumChildren()!=1)
+                    reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on Array: Wrong number of operands!"));
+        
+            if(!SemanticUtils.isInteger(symbolTable, node.getJmmChild(0), reports))
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error on Array: Index must be a Integer!"));
+    
+            return true;
+        }
 }
