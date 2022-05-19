@@ -11,7 +11,7 @@ class Test extends A {
 		a = new A();
 
 		// Assume bar() is in A
-		a.bar();
+		a.bar().length;
 		
 		return 0;
 	}

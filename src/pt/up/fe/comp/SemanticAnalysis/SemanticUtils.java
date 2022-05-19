@@ -110,8 +110,8 @@ public class SemanticUtils {
             if(symbol.getName().equals(node.get("name")))
                     return symbol.getType();
         }
-        
-        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error: Variable not declared!"));
+        if(!symbolTable.getImports().contains(node.get("name")))
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC,Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error: Variable not declared!"));
         return null;
 }
 
@@ -137,7 +137,7 @@ public class SemanticUtils {
 
         if(typeBefore==null)
         {  
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1,-1, "Error: Variable not declared!"));
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC,Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error: Variable not declared!"));
         return null;
         }
 
