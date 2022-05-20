@@ -9,6 +9,8 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
+import pt.up.fe.comp.jmm.report.Stage;
 
 public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
 
@@ -58,13 +60,8 @@ public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
         StringBuilder importString = new StringBuilder(node.get("name"));
         for (JmmNode child : node.getChildren())
         {   
-            
-            importString.append(child.get("name"));
-            for (JmmNode childImport : child.getChildren())
-                {
-                    importString.append(".");
-                    importString.append(childImport.get("name"));
-                }
+            importString.append(".");
+            importString.append(child.get("name"));    
         }
         symbolTable.addImport(importString.toString());
 
@@ -85,8 +82,9 @@ public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
                 for(var childBody:child.getChildren())
                 {
                     if(childBody.getKind().equals("VarDeclaration"))
-                        method.addLocalVariable(new Type(childBody.getJmmChild(0).get("name"), parseBoolean(childBody.getJmmChild(0).get("isArray"))), childBody.get("name"));
-                }
+                        if(!method.addLocalVariable(new Type(childBody.getJmmChild(0).get("name"), parseBoolean(childBody.getJmmChild(0).get("isArray"))), childBody.get("name")))
+                            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(childBody.get("line")),Integer.valueOf(childBody.get("col")), "Redeclaration of a variable!"));
+                    }
             }
         }
 
@@ -121,10 +119,13 @@ public class SymbolTableVisitor extends PreorderJmmVisitor<Boolean, Boolean>{
                 for(var childBody:child.getChildren())
                 {
                     if(childBody.getKind().equals("VarDeclaration")){
-                        method.addLocalVariable(new Type(childBody.getJmmChild(0).get("name"), parseBoolean(childBody.getJmmChild(0).get("isArray"))), childBody.get("name"));
-                }}
+                        if(!method.addLocalVariable(new Type(childBody.getJmmChild(0).get("name"), parseBoolean(childBody.getJmmChild(0).get("isArray"))), childBody.get("name")))
+                            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(childBody.get("line")),Integer.valueOf(childBody.get("col")), "Redeclaration of a variable!"));
+                    }
+            
             }
         }
+    }
 
         symbolTable.addMethod(method);
         return true;

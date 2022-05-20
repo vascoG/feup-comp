@@ -16,16 +16,6 @@ public class JmmOptimizer implements JmmOptimization{
 
         System.out.println("OLLIR CODE : \n" + ollirCode);
 
-
-/*        String ollirCode = "import ioPlus;\r\n"
-        + "import BoardBase;\r\n"
-        + "import java.io.File;\r\n"
-        + "\r\n"        
-        + "class HelloWorld  extends BoardBase{\r\n"
-        + "\r\n"
-        + "\r\n"
-        +"}";
-*/
         return new OllirResult(semanticsResult, ollirCode, Collections.emptyList());
     }
 

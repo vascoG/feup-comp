@@ -29,7 +29,7 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         addVisit("Sub", this::visitMathOperations);
         addVisit("Mul", this::visitMathOperations);
         addVisit("Div", this::visitMathOperations);
-        addVisit("LessOp", this::visitBooleanOperations);
+        addVisit("LessOp", this::visitMathOperations);
         addVisit("AndOp", this::visitBooleanOperations);
         addVisit("Neg", this::visitNotOperations);
         addVisit("ReturnExpression",this::visitReturn);
@@ -48,6 +48,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         for (JmmNode child : children)
         {
             if (child.getKind().equals("IfCondition")){
+                if(node.getJmmChild(0).getKind().equals("Call")){ 
+                    node.getJmmChild(0).put("typeName", "boolean");
+                    node.getJmmChild(0).put("isArray", "false");
+                }
                     if(!SemanticUtils.isBoolean(symbolTable, child.getJmmChild(0), reports))
                         reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on If Condition: Must be a boolean!"));
             }
@@ -62,6 +66,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         for (JmmNode child : children)
         {
             if (child.getKind().equals("WhileCondition")){
+                if(node.getJmmChild(0).getKind().equals("Call")){ 
+                    node.getJmmChild(0).put("typeName", "boolean");
+                    node.getJmmChild(0).put("isArray", "false");
+            }
                     if(!SemanticUtils.isBoolean(symbolTable, child.getJmmChild(0), reports))
                         reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on While Condition: Must be a boolean!"));
                     
@@ -81,6 +89,15 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         if(!SemanticUtils.isInteger(symbolTable, node.getJmmChild(1), reports))
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Math Operation: Right Operand is not a Integer!"));
 
+
+        if(node.getJmmChild(0).getKind().equals("Call")){ 
+                node.getJmmChild(0).put("typeName", "int");
+                node.getJmmChild(0).put("isArray", "false");
+        }  
+        if(node.getJmmChild(1).getKind().equals("Call")){ 
+            node.getJmmChild(1).put("typeName", "int");
+            node.getJmmChild(1).put("isArray", "false");
+        }  
         return true;
     }
 
@@ -94,6 +111,15 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         if(!SemanticUtils.isBoolean(symbolTable, node.getJmmChild(1), reports))
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Boolean Operation: Right Operand is not a Boolean!"));
 
+
+        if(node.getJmmChild(0).getKind().equals("Call")){ 
+                node.getJmmChild(0).put("typeName", "boolean");
+                node.getJmmChild(0).put("isArray", "false");
+        }  
+        if(node.getJmmChild(1).getKind().equals("Call")){ 
+            node.getJmmChild(1).put("typeName", "boolean");
+            node.getJmmChild(1).put("isArray", "false");
+        }
         return true;
     }
 
@@ -104,7 +130,11 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         if(!SemanticUtils.isBoolean(symbolTable, node.getJmmChild(0), reports))
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Boolean Operation: Unary Operand is not a Boolean!"));
 
-        
+            if(node.getJmmChild(0).getKind().equals("Call")){ 
+                node.getJmmChild(0).put("typeName", "boolean");
+                node.getJmmChild(0).put("isArray", "false");
+        }  
+      
 
         return true;
     }
@@ -123,8 +153,34 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         Type left = SemanticUtils.getNodeType(symbolTable, node.getJmmChild(0), reports);
         Type right = SemanticUtils.getNodeType(symbolTable, node.getJmmChild(1), reports);
 
+        
+        if(node.getJmmChild(0).getKind().equals("Call")){ 
+            if(left==null){ 
+                node.getJmmChild(0).put("typeName", right.getName());
+                node.getJmmChild(0).put("isArray", Boolean.toString(right.isArray()));
+            }
+            else
+            {
+                node.getJmmChild(0).put("typeName", left.getName());
+                node.getJmmChild(0).put("isArray", Boolean.toString(left.isArray()));
+            }
+        }
+
+        if(node.getJmmChild(1).getKind().equals("Call")){ 
+            if(left==null){ 
+                node.getJmmChild(1).put("typeName", right.getName());
+                node.getJmmChild(1).put("isArray", Boolean.toString(right.isArray()));
+            }
+            else
+            {
+                node.getJmmChild(1).put("typeName", left.getName());
+                node.getJmmChild(1).put("isArray", Boolean.toString(left.isArray()));
+            }
+        }
+
         if(left==null || right == null)
             return true;
+
 
         if(right.getName().equals(symbolTable.getClassName()) && left.getName().equals(symbolTable.getSuper()))
             return true;
@@ -143,10 +199,18 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
 
        Type type = SemanticUtils.getNodeType(symbolTable, node.getJmmChild(0), reports);
 
+       String method = SemanticUtils.getParentMethod(node);
+       Type realType = symbolTable.getReturnType(method);
+
+       if(node.getJmmChild(0).getKind().equals("Call"))
+       { 
+           node.put("typeName", realType.getName());
+           node.put("isArray", Boolean.toString(realType.isArray()));
+       }
+
         if(type == null)
             return true;
-        String method = SemanticUtils.getParentMethod(node);
-        Type realType = symbolTable.getReturnType(method);
+
 
         if(type.getName().equals(symbolTable.getClassName()) && realType.getName().equals(symbolTable.getSuper()))
             return true;
@@ -180,6 +244,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
                     for(Symbol param : params)
                     {  
                         Type typeParam = SemanticUtils.getNodeType(symbolTable, methodCall.getJmmChild(index), reports);
+                        if(node.getJmmChild(index).getKind().equals("Call")){ 
+                                node.getJmmChild(index).put("typeName", param.getType().getName());
+                                node.getJmmChild(index).put("isArray", Boolean.toString(param.getType().isArray()));
+                        }
                         if(typeParam==null)
                             continue;
                         if(!SemanticUtils.sameType(param.getType(), typeParam) )
@@ -212,6 +280,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
             else
             {
                 Type type = SemanticUtils.getNodeType(symbolTable, node.getJmmChild(0), reports);
+                if(node.getJmmChild(0).getKind().equals("Call")){ 
+                        node.getJmmChild(0).put("typeName", "int");
+                        node.getJmmChild(0).put("isArray", "true");
+                }
                 if(type==null)
                     return true;
                 if(SemanticUtils.sameType(type, new Type("int", true)))
@@ -228,6 +300,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         
             
             Type left = SemanticUtils.getNodeType(symbolTable, node.getJmmChild(0), reports);
+            if(node.getJmmChild(0).getKind().equals("Call")){ 
+                    node.getJmmChild(0).put("typeName", "int");
+                    node.getJmmChild(0).put("isArray", "true");
+            }
             if(left == null)
                  return true;
             if(!SemanticUtils.sameType(left, new Type("int", true)))
@@ -235,6 +311,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
             if(!SemanticUtils.isInteger(symbolTable, node.getJmmChild(1), reports))
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on ArrayIndex: Index must be a Integer!"));
     
+            if(node.getJmmChild(1).getKind().equals("Call")){ 
+                    node.getJmmChild(1).put("typeName", "int");
+                    node.getJmmChild(1).put("isArray", "false");
+            }
             return true;
         }
     
@@ -244,7 +324,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
         
             if(!SemanticUtils.isInteger(symbolTable, node.getJmmChild(0), reports))
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Array: Index must be a Integer!"));
-    
+            if(node.getJmmChild(0).getKind().equals("Call")){ 
+                    node.getJmmChild(0).put("typeName", "int");
+                    node.getJmmChild(0).put("isArray", "false");
+            }
             return true;
         }
 }

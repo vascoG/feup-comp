@@ -29,22 +29,40 @@ public class OllirUtils {
 
     public static String getOllirType(String jmmType){
         switch(jmmType){
-            case "void" : 
+            case "void":
                 return "V";
-            default: 
+            case "int":
+                return"i32";
+            case "boolean":
+                return"bool";
+            default:
                 return jmmType;
         }
+
     }
 
     public static String getOperation(JmmNode node){
         switch(node.getKind()){
-            case "And": return "&&.bool";
+            case "AndOp": return "&&.bool";
             case "Not": return "!.bool";
-            case "Less": return "<.i32";
+            case "LessOp": return "<.i32";
             case "Add": return "+.i32";
             case "Sub": return "-.i32";
-            case "Mult": return "*.i32";
+            case "Mul": return "*.i32";
             case "Div": return "/.i32";
+            default: return "";
+        }
+    }
+
+    public static String getOperationType(JmmNode node){
+        switch(node.getKind()){
+            case "AndOp": return ".bool";
+            case "Not": return ".bool";
+            case "LessOp": return ".i32";
+            case "Add": return ".i32";
+            case "Sub": return ".i32";
+            case "Mul": return ".i32";
+            case "Div": return ".i32";
             default: return "";
         }
     }
@@ -78,6 +96,17 @@ public class OllirUtils {
             return String.join(".", aux);
         }
         return exprStmt;
+    }
+
+    public static String getParentMethod(JmmNode node) {
+
+        while(!node.getKind().equals("OtherMethodDeclaration") && !node.getKind().equals("MainMethodDeclaration"))
+            node = node.getJmmParent();
+
+        if(node.getKind().equals("OtherMethodDeclaration"))
+            return node.get("name");
+        
+        return "main";
     }
 }
 

@@ -215,6 +215,8 @@ public class JasminUtils {
                 return "isub";
             case DIV:
                 return "idiv";
+            case ANDB:
+                return "iand";
             default:
                 throw new NotImplementedException(opType);
     }

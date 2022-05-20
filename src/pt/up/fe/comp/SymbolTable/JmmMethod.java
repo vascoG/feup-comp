@@ -22,9 +22,13 @@ public class JmmMethod {
         }
     }
 
-    public void addLocalVariable(Type type, String name)
+    public boolean addLocalVariable(Type type, String name)
     {
+        if(localVariables.containsKey(name))
+            return false;
+        
         localVariables.put(name, new Symbol(type, name));
+        return true;
     }
 
     public String getName()

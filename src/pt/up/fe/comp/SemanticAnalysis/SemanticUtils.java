@@ -16,7 +16,7 @@ public class SemanticUtils {
     public static boolean isBoolean(JmmSymbolTable symbolTable, JmmNode node, List<Report> reports) {
 
         switch(node.getKind())
-        {   case "Call": if(sameType(getReturnCallType(symbolTable, node, reports), new Type("int", false))) return true; break;
+        {   case "Call": if(sameType(getReturnCallType(symbolTable, node, reports), new Type("boolean", false))) return true; break;
             case "Neg": if(isBoolean(symbolTable, node.getJmmChild(0), reports)) return true; break;
             case "FTTrue": return true;
             case "FTFalse": return true;
@@ -136,10 +136,7 @@ public class SemanticUtils {
         Type typeBefore = getNodeType(symbolTable, beforeDotNode, reports);
 
         if(typeBefore==null)
-        {  
-            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC,Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error: Variable not declared!"));
-        return null;
-        }
+            return null;
 
         if((beforeDotNode.getKind().equals("FTThis")||typeBefore.getName().equals(symbolTable.getClassName()))&& methodOnSymbolTable)
             return symbolTable.getReturnType(afterDotNode.get("name"));
