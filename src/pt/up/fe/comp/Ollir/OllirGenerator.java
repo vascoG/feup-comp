@@ -14,11 +14,14 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
     private final StringBuilder code;
     private final SymbolTable symbolTable;
     private int cont;
+    private int whileCount;
 
 
 
     public OllirGenerator(SymbolTable symbolTable){
+        
         cont=0;
+        whileCount=0;
         this.code = new StringBuilder();
         this.symbolTable = symbolTable;
 
@@ -42,7 +45,10 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         addVisit("Assignment",this::assignmentVisit);
         addVisit("ReturnExpression",this::returnVisit);
         addVisit("Call", this::callVisit);
-
+        addVisit("CompoundStatement", this::compoundStatementVisit);
+        addVisit("WhileBlock", this::whileBlockVisit);
+        addVisit("WhileCondition", this::whileConditionVisit);
+        addVisit("WhileStatement", this::whileStatementVisit);
     }
 
     public String getCode(){
@@ -124,8 +130,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
                 visit(child);
         }
 
-
-        code.append("\n}\n");
+        code.append("\nret.V;\n}\n");
         return null;
     }
 
@@ -399,6 +404,55 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
 
         return thisCode;
     }
+
+    private Code whileBlockVisit(JmmNode node, Integer integer){
+        whileCount++;
+
+        code.append("Loop"+whileCount+":\n");
+
+        for(JmmNode child : node.getChildren()){
+            Code vis = visit(child);
+            if (vis != null)
+                code.append(vis.prefix).append(vis.code).append(";\n");
+        }
+
+        code.append("EndLoop"+whileCount+":\n");
+
+        return null;
+    }
+
+
+    private Code whileConditionVisit(JmmNode node, Integer integer) {
+        Code condition=visit(node.getJmmChild(0));
+
+        code.append(condition.prefix);
+        code.append("if (" + condition.code+ ") goto WhileBody"+whileCount+";\n");
+        code.append("goto EndLoop"+whileCount+";\n");
+
+       return null;
+    }
+
+    private Code whileStatementVisit(JmmNode node, Integer integer) {
+        code.append("WhileBody"+whileCount+":\n");
+
+        for (JmmNode child : node.getChildren()){
+            Code vis = visit(child);
+            if (vis != null)
+                code.append(vis.prefix).append(vis.code).append(";\n");
+        }
+
+        code.append("goto Loop"+whileCount+";\n");
+       return null;
+    }
+    private Code compoundStatementVisit(JmmNode node, Integer integer) {
+        for(JmmNode child:node.getChildren()){
+            Code vis = visit(child);
+            if (vis != null)
+                code.append(vis.prefix).append(vis.code).append(";\n");
+        }
+        return null;
+    }
+
 
 
 }

@@ -58,7 +58,7 @@ public class OllirUtils {
         switch(node.getKind()){
             case "AndOp": return ".bool";
             case "Not": return ".bool";
-            case "LessOp": return ".i32";
+            case "LessOp": return ".bool";
             case "Add": return ".i32";
             case "Sub": return ".i32";
             case "Mul": return ".i32";
