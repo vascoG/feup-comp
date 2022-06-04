@@ -9,7 +9,6 @@ import org.specs.comp.ollir.AssignInstruction;
 import org.specs.comp.ollir.BinaryOpInstruction;
 import org.specs.comp.ollir.CallInstruction;
 import org.specs.comp.ollir.ClassType;
-import org.specs.comp.ollir.ClassUnit;
 import org.specs.comp.ollir.CondBranchInstruction;
 import org.specs.comp.ollir.Descriptor;
 import org.specs.comp.ollir.Element;
@@ -40,6 +39,7 @@ public class JasminUtils {
 
     public static int maxStack;
     public static int currentStack;
+    public static int conditionsCounter;
 
     public static void changeStack(int number)
     {

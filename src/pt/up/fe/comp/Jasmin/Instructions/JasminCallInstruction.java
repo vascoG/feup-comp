@@ -48,8 +48,7 @@ public class JasminCallInstruction {
         { 
             sb.append("new ");
             sb.append(((Operand)instruction.getFirstArg()).getName()).append("\n");
-            sb.append("dup\n");
-            JasminUtils.changeStack(2);
+            JasminUtils.changeStack(1);
         }
 
         else if (returnType.getTypeOfElement()==ElementType.ARRAYREF)

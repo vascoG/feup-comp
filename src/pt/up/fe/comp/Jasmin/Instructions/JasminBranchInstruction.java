@@ -15,7 +15,7 @@ public class JasminBranchInstruction {
 
         StringBuilder sb = new StringBuilder();
         sb.append(JasminUtils.getLoadCode(first, method.getVarTable()));
-        sb.append("ifne WhileBody1");
+        sb.append("ifne ").append(instruction.getLabel());
         sb.append("\n");
         
         JasminUtils.changeStack(-1);

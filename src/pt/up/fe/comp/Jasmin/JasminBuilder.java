@@ -17,6 +17,7 @@ public class JasminBuilder {
     public JasminBuilder( ClassUnit classUnit) {
         this.jasminCode = new StringBuilder();
         JasminBuilder.classUnit = classUnit;
+        JasminUtils.conditionsCounter=0;
     }
 
     public String generateJasminCode()
@@ -68,7 +69,7 @@ public class JasminBuilder {
             jasminCode.append(".limit stack "+JasminUtils.maxStack+"\n");
 
             if(JasminUtils.currentStack!=0)
-                throw new NotImplementedException("current stack is not empty!: "+JasminUtils.currentStack+"\nmaxstack: "+JasminUtils.maxStack);
+                System.err.println("current stack is not empty!: "+JasminUtils.currentStack+"\nmaxstack: "+JasminUtils.maxStack);
             
             jasminCode.append(instructionsCode.toString());
 
