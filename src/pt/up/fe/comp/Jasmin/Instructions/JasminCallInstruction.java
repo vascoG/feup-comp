@@ -49,6 +49,7 @@ public class JasminCallInstruction {
             sb.append("new ");
             sb.append(((Operand)instruction.getFirstArg()).getName()).append("\n");
             sb.append("dup\n");
+            JasminUtils.changeStack(2);
         }
 
         else if (returnType.getTypeOfElement()==ElementType.ARRAYREF)
@@ -79,12 +80,18 @@ public class JasminCallInstruction {
         sb.append(callMethodName.replace("\"", ""));
 
         sb.append("(");
-        for(Element param : params)
+        for(Element param : params){
             sb.append(JasminUtils.getJasminType(param.getType()));
+            JasminUtils.changeStack(-1);
+        }
         sb.append(")");
         
         sb.append(JasminUtils.getJasminType(returnType));
         sb.append("\n");
+
+        if(returnType.getTypeOfElement()== ElementType.VOID)
+            JasminUtils.changeStack(-1);
+
 
         return sb.toString();
     }
@@ -109,14 +116,19 @@ public class JasminCallInstruction {
             sb.append(method.getOllirClass().getClassName());
         sb.append(".<init>(");
 
-        for (Element param : params)
+        for (Element param : params){ 
+            JasminUtils.changeStack(-1);
             sb.append(JasminUtils.getJasminType(param.getType()));
+        }
 
         sb.append(")");
 
         sb.append(JasminUtils.getJasminType(returnType));
 
         sb.append("\n");
+
+        JasminUtils.changeStack(-1);
+
 
         return sb.toString();
     }
@@ -137,8 +149,10 @@ public class JasminCallInstruction {
         sb.append(callMethodName.replace("\"", ""));
 
         sb.append("(");
-        for(Element param : params)
+        for(Element param : params){ 
+            JasminUtils.changeStack(-1);
             sb.append(JasminUtils.getJasminType(param.getType()));
+        } 
         sb.append(")");
         
         sb.append(JasminUtils.getJasminType(returnType));

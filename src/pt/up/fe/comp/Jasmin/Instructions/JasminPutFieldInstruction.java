@@ -24,6 +24,9 @@ public class JasminPutFieldInstruction {
         sb.append(JasminUtils.getJasminType(instruction.getSecondOperand().getType()));
         sb.append("\n");
 
+        JasminUtils.changeStack(-2);
+
+
         return sb.toString();
     }
     

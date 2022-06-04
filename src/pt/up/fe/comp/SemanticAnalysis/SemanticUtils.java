@@ -105,10 +105,12 @@ public class SemanticUtils {
                     return symbol.getType();
         }
 
+        if(!parentMethod.equals("main")){
         for(Symbol symbol : fields)
         { 
             if(symbol.getName().equals(node.get("name")))
                     return symbol.getType();
+        }
         }
         if(!symbolTable.getImports().contains(node.get("name")))
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC,Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error: Variable not declared!"));

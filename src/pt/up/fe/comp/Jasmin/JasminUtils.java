@@ -10,10 +10,12 @@ import org.specs.comp.ollir.BinaryOpInstruction;
 import org.specs.comp.ollir.CallInstruction;
 import org.specs.comp.ollir.ClassType;
 import org.specs.comp.ollir.ClassUnit;
+import org.specs.comp.ollir.CondBranchInstruction;
 import org.specs.comp.ollir.Descriptor;
 import org.specs.comp.ollir.Element;
 import org.specs.comp.ollir.ElementType;
 import org.specs.comp.ollir.GetFieldInstruction;
+import org.specs.comp.ollir.GotoInstruction;
 import org.specs.comp.ollir.Instruction;
 import org.specs.comp.ollir.LiteralElement;
 import org.specs.comp.ollir.Method;
@@ -26,6 +28,7 @@ import org.specs.comp.ollir.Type;
 
 import pt.up.fe.comp.Jasmin.Instructions.JasminAssignInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminBinaryOperInstruction;
+import pt.up.fe.comp.Jasmin.Instructions.JasminBranchInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminPutFieldInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminReturnInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminCallInstruction;
@@ -34,6 +37,16 @@ import pt.up.fe.comp.Jasmin.Instructions.JasminSingleOpInstruction;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 public class JasminUtils {
+
+    public static int maxStack;
+    public static int currentStack;
+
+    public static void changeStack(int number)
+    {
+        currentStack+=number;
+        if(currentStack>maxStack)
+            maxStack=currentStack;
+    }
 
     public static String modifierToString(AccessModifiers accessModifier) {
         switch (accessModifier) {
@@ -111,7 +124,12 @@ public class JasminUtils {
             return JasminReturnInstruction.getInstructionCode((ReturnInstruction)instruction, method);
         case BINARYOPER:
             return JasminBinaryOperInstruction.getInstructionCode((BinaryOpInstruction)instruction, method);
-        default: throw new NotImplementedException(instruction.getInstType());
+        case BRANCH:
+            return JasminBranchInstruction.getInstructionCode((CondBranchInstruction)instruction,method);
+        case GOTO: 
+            return "goto " + ((GotoInstruction)instruction).getLabel()+"\n";
+        default: return "";
+        
     }
     }
 
@@ -120,6 +138,7 @@ public class JasminUtils {
     }
 
     private static String aload(int reg) {
+        changeStack(1);
         StringBuilder sb = new StringBuilder();
         sb.append("aload ").append(reg).append("\n");
         return sb.toString();
@@ -150,12 +169,14 @@ public class JasminUtils {
     }
 
     private static String iload(int reg) {
+        changeStack(1);
         StringBuilder sb = new StringBuilder();
         sb.append("iload ").append(reg).append("\n");
         return sb.toString();
     }
 
     private static String ldc(String literal) {
+        changeStack(1);
         StringBuilder sb = new StringBuilder();
         
         sb.append("ldc ").append(literal).append("\n");
@@ -175,6 +196,7 @@ public class JasminUtils {
     }
 
     private static String astore(int reg) {
+        changeStack(-1);
         StringBuilder sb = new StringBuilder();
         sb.append("astore ").append(reg).append("\n");
 
@@ -182,6 +204,7 @@ public class JasminUtils {
     }
 
     private static String istore(int reg) {
+        changeStack(-1);
         StringBuilder sb = new StringBuilder();
         sb.append("istore ").append(reg).append("\n");
 
@@ -195,6 +218,7 @@ public class JasminUtils {
 
         StringBuilder sb = new StringBuilder();
         sb.append(aload(arrayReg)).append(iload(indexReg)).append("iastore\n");
+        changeStack(-2);
 
         return sb.toString();
     }
@@ -217,6 +241,8 @@ public class JasminUtils {
                 return "idiv";
             case ANDB:
                 return "iand";
+            case LTH:
+                return "if_icmplt";
             default:
                 throw new NotImplementedException(opType);
     }

@@ -389,7 +389,9 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
 
         Code thisCode = new Code();
 
-        if(node.getJmmParent().getKind().equals("MethodBody")){
+        String parentNodeKind = node.getJmmParent().getKind();
+
+        if(parentNodeKind.equals("MethodBody") || parentNodeKind.equals("CompoundStatement")){
             
             thisCode.code = finalCode;
             thisCode.prefix = prefixCode;

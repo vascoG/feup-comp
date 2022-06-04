@@ -449,6 +449,6 @@ public class Cpf4_Jasmin {
         assertTrue(
                 "limit stack should be = " + expectedLimit + " (accepted if <= " + upperLimit
                         + "), but is " + numStack + ":\n" + methodCode,
-                numStack <= upperLimit && numStack > 1);
+                numStack <= upperLimit && numStack >= expectedLimit);
     }
 }

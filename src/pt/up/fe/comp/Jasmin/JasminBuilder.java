@@ -8,6 +8,8 @@ import org.specs.comp.ollir.Field;
 import org.specs.comp.ollir.Instruction;
 import org.specs.comp.ollir.Method;
 
+import pt.up.fe.specs.util.exceptions.NotImplementedException;
+
 public class JasminBuilder {
     private StringBuilder jasminCode;
     public static ClassUnit classUnit;
@@ -49,18 +51,28 @@ public class JasminBuilder {
             jasminCode.append(JasminUtils.getJasminType(method.getReturnType()));
             jasminCode.append("\n");
 
-            jasminCode.append(".limit locals 99\n");
-            jasminCode.append(".limit stack 99\n");
-            
+            JasminUtils.currentStack=0;
+            JasminUtils.maxStack=0;
+
+            StringBuilder instructionsCode = new StringBuilder();
+
             for(Instruction instruction : method.getInstructions())
             { 
                 for (String label : method.getLabels(instruction))
-                    jasminCode.append(label).append(":\n");
+                    instructionsCode.append(label).append(":\n");
 
-                jasminCode.append(JasminUtils.getInstructionCode(instruction, method));
+                instructionsCode.append(JasminUtils.getInstructionCode(instruction, method));
             } 
 
-            if(method.getReturnType().getTypeOfElement()==ElementType.VOID)
+            jasminCode.append(".limit locals 99\n");
+            jasminCode.append(".limit stack "+JasminUtils.maxStack+"\n");
+
+            if(JasminUtils.currentStack!=0)
+                throw new NotImplementedException("current stack is not empty!: "+JasminUtils.currentStack+"\nmaxstack: "+JasminUtils.maxStack);
+            
+            jasminCode.append(instructionsCode.toString());
+
+            if(method.isConstructMethod())
                 jasminCode.append("return\n");
 
             jasminCode.append(".end method\n");

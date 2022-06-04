@@ -257,6 +257,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
                             }
                         index++;
                     }
+                    if(node.getJmmChild(0).getKind().equals("FTThis") && SemanticUtils.getParentMethod(node).equals("main"))
+                    {
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: calling this on main!"));   
+                    }
                     return true;
                 }
 
@@ -271,7 +275,18 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
                     else if(symbolTable.getImports().contains(type.getName()))
                         return true;
                 }
-                if(symbolTable.getImports().contains(node.getJmmChild(0).get("name")))
+                if(node.getJmmChild(0).getKind().equals("FTThis")){
+                if(SemanticUtils.getParentMethod(node).equals("main"))
+                {
+                    reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: calling this on main!"));   
+                }
+                else if(!symbolTable.getMethods().contains(methodCall.get("name")))
+                {
+                    reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: unexisting method!"));   
+
+                }
+            }
+                else if(symbolTable.getImports().contains(node.getJmmChild(0).get("name")))
                     return true;
                 
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: unexisting method"));

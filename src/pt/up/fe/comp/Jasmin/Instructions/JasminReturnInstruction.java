@@ -23,6 +23,8 @@ public class JasminReturnInstruction {
         else
             sb.append("areturn\n");
 
+        JasminUtils.changeStack(-1);
+
         return sb.toString();
     }
     
