@@ -45,6 +45,7 @@ public class SemanticUtils {
         {   
             case "Call": if(sameType(getReturnCallType(symbolTable, node, reports), new Type("int", false))) return true; break;
             case "FTIdentifier": if (sameType(getVariableType(symbolTable, node, reports), new Type("int", false))) return true; break;
+            case "ArrayIndex":
             case "FTInt" : return true;
             case "Add":
             case "Mul":

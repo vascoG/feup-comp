@@ -24,6 +24,7 @@ import org.specs.comp.ollir.PutFieldInstruction;
 import org.specs.comp.ollir.ReturnInstruction;
 import org.specs.comp.ollir.SingleOpInstruction;
 import org.specs.comp.ollir.Type;
+import org.specs.comp.ollir.UnaryOpInstruction;
 
 import pt.up.fe.comp.Jasmin.Instructions.JasminAssignInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminBinaryOperInstruction;
@@ -33,6 +34,7 @@ import pt.up.fe.comp.Jasmin.Instructions.JasminReturnInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminCallInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminGetFieldInstruction;
 import pt.up.fe.comp.Jasmin.Instructions.JasminSingleOpInstruction;
+import pt.up.fe.comp.Jasmin.Instructions.JasminUnaryOperInstruction;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 public class JasminUtils {
@@ -80,6 +82,18 @@ public class JasminUtils {
 
     }
 
+    public static String getJasminEspecialType(Type type)
+    {
+        switch(type.getTypeOfElement())
+        {
+            case THIS: return JasminBuilder.classUnit.getClassName();
+            case CLASS: return ((ClassType)type).getName();
+            case OBJECTREF: return ((ClassType)type).getName();
+            default: throw new NotImplementedException(type.getTypeOfElement());
+            
+        }
+    }
+
     private static String getJasminObjectType(ClassType type) {
         StringBuilder sb = new StringBuilder();
         for(String imports : JasminBuilder.classUnit.getImports())
@@ -124,6 +138,8 @@ public class JasminUtils {
             return JasminReturnInstruction.getInstructionCode((ReturnInstruction)instruction, method);
         case BINARYOPER:
             return JasminBinaryOperInstruction.getInstructionCode((BinaryOpInstruction)instruction, method);
+        case UNARYOPER:
+            return JasminUnaryOperInstruction.getInstructionCode((UnaryOpInstruction)instruction,method);
         case BRANCH:
             return JasminBranchInstruction.getInstructionCode((CondBranchInstruction)instruction,method);
         case GOTO: 
@@ -241,6 +257,8 @@ public class JasminUtils {
                 return "idiv";
             case ANDB:
                 return "iand";
+            case NOTB:
+                return "if_icmpne";
             case LTH:
                 return "if_icmplt";
             default:

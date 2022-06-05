@@ -36,6 +36,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         addVisit("Div", this::binOpVisit);
         addVisit("AndOp", this::binOpVisit);
         addVisit("LessOp", this::binOpVisit);
+        addVisit("Neg", this::uniOpVisit);
         addVisit("FTInt",this::intVisit);
         addVisit("FTFalse",this::falseVisit);
         addVisit("FTIdentifier",this::identifierVisit);
@@ -49,6 +50,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         addVisit("WhileBlock", this::whileBlockVisit);
         addVisit("WhileCondition", this::whileConditionVisit);
         addVisit("WhileStatement", this::whileStatementVisit);
+        addVisit("ArrayIndex", this::arrayIndexVisit);
     }
 
     public String getCode(){
@@ -210,6 +212,10 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         String methodSignature = OllirUtils.getParentMethod(node);
         String type="";
 
+        if(node.getJmmChild(0).getKind().equals("ArrayIndex"))
+            type="i32";
+        else
+        {
         for(Symbol symbol : symbolTable.getFields())
         {
             if(symbol.getName().equals(node.getJmmChild(0).get("name")))
@@ -221,10 +227,13 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
             if(symbol.getName().equals(node.getJmmChild(0).get("name")))
                  type = OllirUtils.getCode(symbol.getType());
         }
+        }
         if(!node.getJmmChild(1).getKind().equals("FTNew"))
             thisCode.code = lhs.code +" :=."+ type + " " + rhs.code;
+        else if (node.getJmmChild(1).getJmmChild(0).getKind().equals("Object"))
+            thisCode.code = lhs.code +" :=."+ type + " " + rhs.code + ";\ninvokespecial("+node.getJmmChild(0).get("name")+"."+type+",\"<init>\").V";
         else
-        thisCode.code = lhs.code +" :=."+ type + " " + rhs.code + ";\ninvokespecial("+node.getJmmChild(0).get("name")+"."+type+",\"<init>\").V";
+        thisCode.code = lhs.code +" :=.array.i32 " + rhs.code;
 
         return thisCode;
     }
@@ -237,7 +246,6 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         Code lhs = visit(node.getJmmChild(0));
         Code rhs = visit(node.getJmmChild(1));
 
-       //TODO:: NOT
         String op = OllirUtils.getOperation(node);
         String typeOp= OllirUtils.getOperationType(node);
 
@@ -252,6 +260,28 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         }else{
 
             thisCode.code = lhs.code + " " + op +  " " + rhs.code;
+        }
+
+        return thisCode;
+
+    }
+
+    private Code uniOpVisit(JmmNode node, Integer dummy){
+        Code lhs = visit(node.getJmmChild(0));
+
+        String op = OllirUtils.getOperation(node);
+        String typeOp= OllirUtils.getOperationType(node);
+
+        Code thisCode = new Code();
+        thisCode.prefix = lhs.prefix;
+
+        if(!node.getJmmParent().getKind().equals("Assignment")){
+            String temp = createTemp(typeOp);
+            thisCode.prefix += temp + " :="+typeOp + op + " " + lhs.code + ";\n";
+            thisCode.code = temp;
+        }else{
+
+            thisCode.code = op + " " + lhs.code;
         }
 
         return thisCode;
@@ -310,14 +340,24 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
 
     private Code intVisit(JmmNode node, Integer integer) {
         Code code = new Code();
+        if(node.getJmmParent().getKind().equals("ArrayIndex")){
+            String temp = createTemp(".i32");
+            code.prefix = temp + " :=.i32 " + node.get("value")+".i32;\n";
+            code.code = temp;
+        }
+        else{
         code.prefix="";
         code.code=node.get("value")+".i32";
+        }
         return code;
     }
 
     private Code newVisit(JmmNode node, Integer integer) {
         Code code = new Code();
-        //assume its never array
+
+        if(node.getJmmChild(0).getKind().equals("Object")){ 
+
+
         String name = node.getJmmChild(0).get("name");
         if(!node.getJmmParent().getKind().equals("Assignment")){
             String temp = createTemp("."+name);
@@ -330,6 +370,23 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
             code.prefix="";
             code.code=" new("+name+")."+name;
         }
+    }
+    else
+    {
+        Code arrayLengthCode = visit(node.getJmmChild(0).getJmmChild(0));
+        if(!node.getJmmParent().getKind().equals("Assignment"))
+        {
+            String temp = createTemp(".array.i32");
+            code.prefix = arrayLengthCode.prefix;
+            code.code=temp;
+            code.prefix+=temp +" :=.array.i32 new(array, "+arrayLengthCode.code+").arrayi32;\n";
+        }
+        else
+        {
+            code.prefix=arrayLengthCode.prefix;
+            code.code = "new(array, "+arrayLengthCode.code+").arrayi32";
+        }
+    }
        
         return code;
     }
@@ -359,15 +416,24 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         String prefixCode = "";
         Code target = visit(node.getJmmChild(0));
         prefixCode += target.prefix;
-        
-        //ignoring length for now
-        String methodName = node.getJmmChild(1).get("name");
         String finalCode;
+        Type returnType;
+
+
+        if(node.getJmmChild(1).getKind().equals("ArrayLength"))
+        {
+            finalCode = "arraylength(" + target.code ;
+            returnType = new Type("int", false);
+        }
+        else{
+
+        String methodName = node.getJmmChild(1).get("name");
         if(target.code!=null)
             finalCode = "invokevirtual(" + target.code + "," + '"' + methodName + '"'  ;
         else
             finalCode = "invokestatic(" + node.getJmmChild(0).get("name") + "," + '"' + methodName + '"'  ;
 
+        
 
         for(var child : node.getJmmChild(1).getChildren())
         {
@@ -376,7 +442,6 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
             finalCode += "," + argCode.code;
         }
 
-        Type returnType;
         try {
         returnType = new Type(node.get("typeName"), Boolean.parseBoolean(node.get("isArray")));
         } catch (Exception e) {
@@ -385,13 +450,17 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
             else
                 returnType = new Type("void", false);
         }
+    
+    }
         finalCode+= ")." + OllirUtils.getCode(returnType);
+
+
 
         Code thisCode = new Code();
 
         String parentNodeKind = node.getJmmParent().getKind();
 
-        if(parentNodeKind.equals("MethodBody") || parentNodeKind.equals("CompoundStatement")){
+        if(parentNodeKind.equals("MethodBody") || parentNodeKind.equals("CompoundStatement") || (parentNodeKind.equals("Assignment") && node.getJmmChild(1).getKind().equals("ArrayLength"))){
             
             thisCode.code = finalCode;
             thisCode.prefix = prefixCode;
@@ -455,6 +524,23 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         return null;
     }
 
+    private Code arrayIndexVisit(JmmNode node, Integer integer) {
+        Code thisCode	= new Code();
+        String targetName = node.getJmmChild(0).get("name");
+        Code index = visit(node.getJmmChild(1));
+        thisCode.prefix = index.prefix;
+
+        if(!node.getJmmParent().getKind().equals("Assignment")){
+            String temp = createTemp(".i32");
+            thisCode.prefix += temp + " :=.i32 " + targetName + "[" +index.code+"].i32;\n";
+            thisCode.code = temp;
+        }else{
+
+            thisCode.code = targetName + "[" +index.code+"].i32";
+        }
+
+        return thisCode;
+    }
 
 
 }

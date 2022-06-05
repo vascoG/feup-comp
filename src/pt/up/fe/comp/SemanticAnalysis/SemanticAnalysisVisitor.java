@@ -232,37 +232,6 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
             var methodCall = node.getJmmChild(1);
             if(methodCall.getKind().equals("MethodCall"))
             { 
-                //caso exista na tabela, confirmar argumentos, senao assumir que argumentos estao bem
-                if(symbolTable.getMethods().contains(methodCall.get("name"))){
-                    List<Symbol> params = symbolTable.getParameters(methodCall.get("name"));
-                    if(params.size()!=methodCall.getNumChildren())
-                    {
-                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: wrong number of parameters!"));
-                        return true;
-                    }
-                    int index = 0;
-                    for(Symbol param : params)
-                    {  
-                        Type typeParam = SemanticUtils.getNodeType(symbolTable, methodCall.getJmmChild(index), reports);
-                        if(node.getJmmChild(index).getKind().equals("Call")){ 
-                                node.getJmmChild(index).put("typeName", param.getType().getName());
-                                node.getJmmChild(index).put("isArray", Boolean.toString(param.getType().isArray()));
-                        }
-                        if(typeParam==null)
-                            continue;
-                        if(!SemanticUtils.sameType(param.getType(), typeParam) )
-                            {
-                                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: wrong type of parameter!"));
-                                return true;
-                            }
-                        index++;
-                    }
-                    if(node.getJmmChild(0).getKind().equals("FTThis") && SemanticUtils.getParentMethod(node).equals("main"))
-                    {
-                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: calling this on main!"));   
-                    }
-                    return true;
-                }
 
                 Type type = SemanticUtils.getNodeType(symbolTable, node.getJmmChild(0), reports);
                 if(type!=null){
@@ -275,19 +244,55 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
                     else if(symbolTable.getImports().contains(type.getName()))
                         return true;
                 }
-                if(node.getJmmChild(0).getKind().equals("FTThis")){
-                if(SemanticUtils.getParentMethod(node).equals("main"))
-                {
-                    reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: calling this on main!"));   
-                }
-                else if(!symbolTable.getMethods().contains(methodCall.get("name")))
-                {
-                    reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: unexisting method!"));   
 
+                if(node.getJmmChild(0).getKind().equals("FTThis")){
+                    if(SemanticUtils.getParentMethod(node).equals("main"))
+                    {
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: calling this on main!"));   
+                    }
+                    else if(!symbolTable.getMethods().contains(methodCall.get("name")))
+                    {
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: unexisting method!"));   
+    
+                    }
                 }
-            }
-                else if(symbolTable.getImports().contains(node.getJmmChild(0).get("name")))
+                    else if(symbolTable.getImports().contains(node.getJmmChild(0).get("name")))
+                        return true;
+
+                //caso exista na tabela, confirmar argumentos, senao assumir que argumentos estao bem
+                if(symbolTable.getMethods().contains(methodCall.get("name"))){
+                    List<Symbol> params = symbolTable.getParameters(methodCall.get("name"));
+                    if(params.size()!=methodCall.getNumChildren())
+                    {
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: wrong number of parameters!"));
+                        return true;
+                    }
+                    int index = -1;
+                    for(Symbol param : params)
+                    {                      
+                        index++;
+                        Type typeParam = SemanticUtils.getNodeType(symbolTable, methodCall.getJmmChild(index), reports);
+                        if(methodCall.getJmmChild(index).getKind().equals("Call")){ 
+                                methodCall.getJmmChild(index).put("typeName", param.getType().getName());
+                                methodCall.getJmmChild(index).put("isArray", Boolean.toString(param.getType().isArray()));
+                        }
+                        if(typeParam==null)
+                            continue;
+                        if(!SemanticUtils.sameType(param.getType(), typeParam) )
+                            {
+                                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: wrong type of parameter!"));
+                                return true;
+                            }
+                    }
+                    if(node.getJmmChild(0).getKind().equals("FTThis") && SemanticUtils.getParentMethod(node).equals("main"))
+                    {
+                        reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: calling this on main!"));   
+                    }
                     return true;
+                }
+
+              
+                
                 
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.valueOf(node.get("line")),Integer.valueOf(node.get("col")), "Error on Method: unexisting method"));
     

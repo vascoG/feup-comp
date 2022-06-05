@@ -44,7 +44,7 @@ public class OllirUtils {
     public static String getOperation(JmmNode node){
         switch(node.getKind()){
             case "AndOp": return "&&.bool";
-            case "Not": return "!.bool";
+            case "Neg": return "!.bool";
             case "LessOp": return "<.i32";
             case "Add": return "+.i32";
             case "Sub": return "-.i32";
@@ -57,7 +57,7 @@ public class OllirUtils {
     public static String getOperationType(JmmNode node){
         switch(node.getKind()){
             case "AndOp": return ".bool";
-            case "Not": return ".bool";
+            case "Neg": return ".bool";
             case "LessOp": return ".bool";
             case "Add": return ".i32";
             case "Sub": return ".i32";

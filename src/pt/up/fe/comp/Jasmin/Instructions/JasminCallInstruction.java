@@ -112,7 +112,7 @@ public class JasminCallInstruction {
                     sb.append(method.getOllirClass().getSuperClass());
             }
         else
-            sb.append(method.getOllirClass().getClassName());
+            sb.append(JasminUtils.getJasminEspecialType(instruction.getFirstArg().getType()));
         sb.append(".<init>(");
 
         for (Element param : params){ 

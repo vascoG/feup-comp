@@ -18,9 +18,9 @@ public class JasminBinaryOperInstruction {
         if(instruction.getOperation().getOpType()==OperationType.LTH){
             JasminUtils.conditionsCounter++;
             sb.append(" True").append(JasminUtils.conditionsCounter);
-            sb.append("\niconst_0\ngoto Store").append(JasminUtils.conditionsCounter);
+            sb.append("\niconst_0\ngoto FinalCond").append(JasminUtils.conditionsCounter);
             sb.append("\nTrue").append(JasminUtils.conditionsCounter);
-            sb.append(":\niconst_1\nStore").append(JasminUtils.conditionsCounter).append(":");
+            sb.append(":\niconst_1\nFinalCond").append(JasminUtils.conditionsCounter).append(":");
             JasminUtils.changeStack(1);
 
             JasminUtils.changeStack(-1);
