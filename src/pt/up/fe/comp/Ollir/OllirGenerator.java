@@ -15,6 +15,8 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
     private final SymbolTable symbolTable;
     private int cont;
     private int whileCount;
+    private int ifCount;
+
 
 
 
@@ -22,6 +24,8 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         
         cont=0;
         whileCount=0;
+        ifCount=0;
+        
         this.code = new StringBuilder();
         this.symbolTable = symbolTable;
 
@@ -51,9 +55,10 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         addVisit("WhileCondition", this::whileConditionVisit);
         addVisit("WhileStatement", this::whileStatementVisit);
         addVisit("ArrayIndex", this::arrayIndexVisit);
-        addVisit("IfBlock", this::IfBlockVisit);
+        addVisit("IFElseBlock", this::IfElseBlockVisit);
         addVisit("IfCondition", this::IfConditionVisit);
         addVisit("IfStatement", this::IfStatementVisit);
+        addVisit("ElseStatement", this::ElseStatementVisit);
     }
 
     public String getCode(){
@@ -545,18 +550,14 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         return thisCode;
     }
 
-    private Code IfBlockVisit(JmmNode node, Integer integer){
+    private Code IfElseBlockVisit(JmmNode node, Integer integer){
         ifCount++;
-
-        code.append("Start If"+ifCount+":\n");
 
         for(JmmNode child : node.getChildren()){
             Code vis = visit(child);
             if (vis != null)
                 code.append(vis.prefix).append(vis.code).append(";\n");
         }
-
-        code.append("End If"+ifCount+":\n");
 
         return null;
     }
@@ -583,5 +584,16 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         return null;
     }
 
+    private Code ElseStatementVisit(JmmNode node, Integer integer){
+        code.append("ElseLoop"+ifCount+":\n");
+
+        for (JmmNode child : node.getChildren()){
+            Code vis = visit(child);
+            if (vis != null)
+                code.append(vis.prefix).append(vis.code).append(";\n");
+        }
+
+        return null;
+    }
 
 }
