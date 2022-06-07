@@ -51,6 +51,9 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         addVisit("WhileCondition", this::whileConditionVisit);
         addVisit("WhileStatement", this::whileStatementVisit);
         addVisit("ArrayIndex", this::arrayIndexVisit);
+        addVisit("IfBlock", this::IfBlockVisit);
+        addVisit("IfCondition", this::IfConditionVisit);
+        addVisit("IfStatement", this::IfStatementVisit);
     }
 
     public String getCode(){
@@ -540,6 +543,44 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         }
 
         return thisCode;
+    }
+
+    private Code IfBlockVisit(JmmNode node, Integer integer){
+        ifCount++;
+
+        code.append("Start If"+ifCount+":\n");
+
+        for(JmmNode child : node.getChildren()){
+            Code vis = visit(child);
+            if (vis != null)
+                code.append(vis.prefix).append(vis.code).append(";\n");
+        }
+
+        code.append("End If"+ifCount+":\n");
+
+        return null;
+    }
+
+    private Code IfConditionVisit(JmmNode node, Integer integer) {
+        Code condition=visit(node.getJmmChild(0));
+
+        code.append(condition.prefix);
+        code.append("if (" + condition.code+ ") goto IfBody"+ifCount+";\n");
+        code.append("goto ElseLoop"+ifCount+";\n");
+
+       return null;
+    }
+
+    private Code IfStatementVisit(JmmNode node, Integer integer){
+        code.append("IfBody"+ifCount+":\n");
+
+        for (JmmNode child : node.getChildren()){
+            Code vis = visit(child);
+            if (vis != null)
+                code.append(vis.prefix).append(vis.code).append(";\n");
+        }
+
+        return null;
     }
 
 
