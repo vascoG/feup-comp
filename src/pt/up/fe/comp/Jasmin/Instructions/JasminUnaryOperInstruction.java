@@ -12,8 +12,6 @@ public class JasminUnaryOperInstruction {
         
 
         sb.append(JasminUtils.getLoadCode(instruction.getOperand(), method.getVarTable()));
-        sb.append("iconst_0\n");
-        JasminUtils.changeStack(1);
         sb.append(JasminUtils.getOperationCode(instruction.getOperation().getOpType()));
 
          JasminUtils.conditionsCounter++;
@@ -22,8 +20,6 @@ public class JasminUnaryOperInstruction {
         sb.append("\nTrue").append(JasminUtils.conditionsCounter);
         sb.append(":\niconst_1\nFinalCond").append(JasminUtils.conditionsCounter).append(":");
         
-        JasminUtils.changeStack(-1);
-
 
         sb.append("\n");
 

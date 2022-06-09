@@ -181,6 +181,8 @@ public class JasminUtils {
         StringBuilder sb = new StringBuilder();
         sb.append(aload(arrayReg)).append(iload(indexReg)).append("iaload\n");
 
+        changeStack(-1);
+
         return sb.toString();
     }
 
@@ -204,7 +206,7 @@ public class JasminUtils {
         ElementType type = param.getType().getTypeOfElement();
 
         if(param instanceof ArrayOperand)
-            return getStoreArrayAccessCode(param, varTable);
+            throw new NotImplementedException (param.getType());
         else if (type == ElementType.INT32 || type == ElementType.BOOLEAN)
             return istore(varTable.get(((Operand)param).getName()).getVirtualReg());
         else
@@ -227,14 +229,15 @@ public class JasminUtils {
         return sb.toString();
     }
 
-    private static String getStoreArrayAccessCode(Element param, HashMap<String, Descriptor> varTable) {
+    public static String getStoreArrayAccessCode(Element param, Method method, Instruction rhs) {
+        var varTable = method.getVarTable();
         int arrayReg = varTable.get(((Operand)param).getName()).getVirtualReg();
         Element index = ((ArrayOperand) param).getIndexOperands().get(0);
         int indexReg = varTable.get(((Operand)index).getName()).getVirtualReg();
 
         StringBuilder sb = new StringBuilder();
-        sb.append(aload(arrayReg)).append(iload(indexReg)).append("iastore\n");
-        changeStack(-2);
+        sb.append(aload(arrayReg)).append(iload(indexReg)).append(getInstructionCode(rhs,method )).append("iastore\n");
+        changeStack(-3);
 
         return sb.toString();
     }
@@ -256,9 +259,8 @@ public class JasminUtils {
             case DIV:
                 return "idiv";
             case ANDB:
-                return "iand";
             case NOTB:
-                return "if_icmpne";
+                return "ifeq";
             case LTH:
                 return "if_icmplt";
             default:

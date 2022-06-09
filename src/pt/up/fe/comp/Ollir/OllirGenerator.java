@@ -468,7 +468,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
 
         String parentNodeKind = node.getJmmParent().getKind();
 
-        if(parentNodeKind.equals("MethodBody") || parentNodeKind.equals("CompoundStatement") || (parentNodeKind.equals("Assignment") && node.getJmmChild(1).getKind().equals("ArrayLength"))){
+        if(parentNodeKind.equals("MethodBody") || parentNodeKind.equals("CompoundStatement") || (parentNodeKind.equals("Assignment") && node.getJmmChild(1).getKind().equals("ArrayLength"))||parentNodeKind.equals("WhileStatement")||parentNodeKind.equals("IfStatement") || parentNodeKind.equals("ElseStatement")|| parentNodeKind.equals("Assignment")){
             
             thisCode.code = finalCode;
             thisCode.prefix = prefixCode;
@@ -485,7 +485,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
     }
 
     private Code whileBlockVisit(JmmNode node, Integer integer){
-        whileCount++;
+        int c = ++whileCount;
 
         code.append("Loop"+whileCount+":\n");
 
@@ -495,7 +495,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
                 code.append(vis.prefix).append(vis.code).append(";\n");
         }
 
-        code.append("EndLoop"+whileCount+":\n");
+        code.append("EndLoop"+c+":\n");
 
         return null;
     }
@@ -551,13 +551,15 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
     }
 
     private Code IfElseBlockVisit(JmmNode node, Integer integer){
-        ifCount++;
+        int c = ++ifCount;
 
         for(JmmNode child : node.getChildren()){
             Code vis = visit(child);
             if (vis != null)
                 code.append(vis.prefix).append(vis.code).append(";\n");
         }
+
+        code.append("Endif").append(c).append(":\n");
 
         return null;
     }
@@ -567,7 +569,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
 
         code.append(condition.prefix);
         code.append("if (" + condition.code+ ") goto IfBody"+ifCount+";\n");
-        code.append("goto ElseLoop"+ifCount+";\n");
+        code.append("goto ElseBody"+ifCount+";\n");
 
        return null;
     }
@@ -581,11 +583,13 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
                 code.append(vis.prefix).append(vis.code).append(";\n");
         }
 
+        code.append("goto Endif").append(ifCount).append(";\n");
+
         return null;
     }
 
     private Code ElseStatementVisit(JmmNode node, Integer integer){
-        code.append("ElseLoop"+ifCount+":\n");
+        code.append("ElseBody"+ifCount+":\n");
 
         for (JmmNode child : node.getChildren()){
             Code vis = visit(child);

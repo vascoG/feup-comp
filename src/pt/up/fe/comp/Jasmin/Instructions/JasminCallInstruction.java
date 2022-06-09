@@ -36,7 +36,7 @@ public class JasminCallInstruction {
 
     private static String newCall(CallInstruction instruction, Method method) {
         ArrayList<Element> ops = instruction.getListOfOperands();
-        Type returnType = instruction.getReturnType();
+        Type returnType = instruction.getFirstArg().getType();
         
         StringBuilder sb = new StringBuilder();
 
@@ -155,6 +155,8 @@ public class JasminCallInstruction {
         sb.append(")");
         
         sb.append(JasminUtils.getJasminType(returnType));
+        if(returnType.getTypeOfElement()!= ElementType.VOID)
+            JasminUtils.changeStack(1);
         sb.append("\n");
 
         return sb.toString();

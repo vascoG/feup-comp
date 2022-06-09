@@ -1,11 +1,16 @@
 package pt.up.fe.comp.Jasmin;
 
+import java.util.ArrayList;
+
 import org.specs.comp.ollir.AccessModifiers;
 import org.specs.comp.ollir.ClassUnit;
+import org.specs.comp.ollir.Descriptor;
 import org.specs.comp.ollir.Element;
 import org.specs.comp.ollir.ElementType;
 import org.specs.comp.ollir.Field;
 import org.specs.comp.ollir.Instruction;
+import org.specs.comp.ollir.CallInstruction;
+import org.specs.comp.ollir.InstructionType;
 import org.specs.comp.ollir.Method;
 
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
@@ -63,10 +68,25 @@ public class JasminBuilder {
                     instructionsCode.append(label).append(":\n");
 
                 instructionsCode.append(JasminUtils.getInstructionCode(instruction, method));
+                if(instruction.getInstType()==InstructionType.CALL)
+                { 
+                    if (((CallInstruction) instruction).getReturnType().getTypeOfElement() != ElementType.VOID){ 
+                        instructionsCode.append("pop\n");
+                        JasminUtils.changeStack(-1);
+                    } 
+                }
             } 
 
-            jasminCode.append(".limit locals 99\n");
-            jasminCode.append(".limit stack "+JasminUtils.maxStack+"\n");
+            ArrayList<Integer> variables = new ArrayList<>();
+            for (Descriptor var : method.getVarTable().values()) {
+                if (!variables.contains(var.getVirtualReg()))
+                    variables.add(var.getVirtualReg());
+            }
+            if (!variables.contains(0) &&  !method.isStaticMethod())
+                variables.add(0);
+
+            jasminCode.append(".limit locals ").append(variables.size()).append("\n");
+            jasminCode.append(".limit stack ").append(JasminUtils.maxStack).append("\n");
 
             if(JasminUtils.currentStack!=0)
                 System.err.println("current stack is not empty!: "+JasminUtils.currentStack+"\nmaxstack: "+JasminUtils.maxStack);

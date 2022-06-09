@@ -12,18 +12,33 @@ public class JasminBinaryOperInstruction {
         StringBuilder sb = new StringBuilder();
 
         sb.append(JasminUtils.getLoadCode(instruction.getLeftOperand(), method.getVarTable()));
-        sb.append(JasminUtils.getLoadCode(instruction.getRightOperand(), method.getVarTable()));
-        sb.append(JasminUtils.getOperationCode(instruction.getOperation().getOpType()));
+        
 
         if(instruction.getOperation().getOpType()==OperationType.LTH){
+            sb.append(JasminUtils.getLoadCode(instruction.getRightOperand(), method.getVarTable()));
+            sb.append(JasminUtils.getOperationCode(instruction.getOperation().getOpType()));
             JasminUtils.conditionsCounter++;
             sb.append(" True").append(JasminUtils.conditionsCounter);
             sb.append("\niconst_0\ngoto FinalCond").append(JasminUtils.conditionsCounter);
             sb.append("\nTrue").append(JasminUtils.conditionsCounter);
             sb.append(":\niconst_1\nFinalCond").append(JasminUtils.conditionsCounter).append(":");
-            JasminUtils.changeStack(1);
+        }
+        else if(instruction.getOperation().getOpType()==OperationType.ANDB){
+            JasminUtils.conditionsCounter++;
+            sb.append(JasminUtils.getOperationCode(instruction.getOperation().getOpType()));
+            sb.append(" False").append(JasminUtils.conditionsCounter);
+            sb.append("\n");
+            sb.append(JasminUtils.getLoadCode(instruction.getRightOperand(), method.getVarTable()));
+            sb.append(JasminUtils.getOperationCode(instruction.getOperation().getOpType()));
+            sb.append(" False").append(JasminUtils.conditionsCounter);
+            sb.append("\niconst_1\ngoto FinalCond").append(JasminUtils.conditionsCounter);
+            sb.append("\nFalse").append(JasminUtils.conditionsCounter);
+            sb.append(":\niconst_0\nFinalCond").append(JasminUtils.conditionsCounter).append(":");
 
-            JasminUtils.changeStack(-1);
+        }
+        else{
+        sb.append(JasminUtils.getLoadCode(instruction.getRightOperand(), method.getVarTable()));
+        sb.append(JasminUtils.getOperationCode(instruction.getOperation().getOpType()));
         }
 
         JasminUtils.changeStack(-1);

@@ -22,8 +22,6 @@ public class JasminGetFieldInstruction {
         sb.append(JasminUtils.getJasminType(instruction.getFieldType()));
         sb.append("\n");
 
-        JasminUtils.changeStack(-1);
-
         return sb.toString();
     }
     

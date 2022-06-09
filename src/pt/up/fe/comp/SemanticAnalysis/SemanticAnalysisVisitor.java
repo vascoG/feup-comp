@@ -256,8 +256,10 @@ public class SemanticAnalysisVisitor extends PreorderJmmVisitor<Boolean, Boolean
     
                     }
                 }
-                    else if(symbolTable.getImports().contains(node.getJmmChild(0).get("name")))
+                else if (node.getJmmChild(0).getKind().equals("FTIdentifier")){
+                    if(symbolTable.getImports().contains(node.getJmmChild(0).get("name")))
                         return true;
+                }
 
                 //caso exista na tabela, confirmar argumentos, senao assumir que argumentos estao bem
                 if(symbolTable.getMethods().contains(methodCall.get("name"))){

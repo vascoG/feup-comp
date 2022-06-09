@@ -20,11 +20,15 @@ public class JasminAssignInstruction {
         StringBuilder sb = new StringBuilder();
 
         if (lhs instanceof ArrayOperand)
-            sb.append(JasminUtils.getLoadCode(lhs, varTable));
+            sb.append(JasminUtils.getStoreArrayAccessCode(lhs, method,rhs));
 
-        sb.append(JasminUtils.getInstructionCode(rhs, method));
+        else{
+            sb.append(JasminUtils.getInstructionCode(rhs, method));
 
-        sb.append(JasminUtils.getStoreCode(lhs, varTable));
+            sb.append(JasminUtils.getStoreCode(lhs, varTable));
+        }
+
+      
 
         return sb.toString();
     }
