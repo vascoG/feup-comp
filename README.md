@@ -2,6 +2,46 @@
 
 For this project, you need to install [Java](https://jdk.java.net/), [Gradle](https://gradle.org/install/), and [Git](https://git-scm.com/downloads/) (and optionally, a [Git GUI client](https://git-scm.com/downloads/guis), such as TortoiseGit or GitHub Desktop). Please check the [compatibility matrix](https://docs.gradle.org/current/userguide/compatibility.html) for Java and Gradle versions.
 
+## GROUP: 9F
+
+| Name             | Number    | E-Mail             | GRADE | CONTRIBUTION |
+| ---------------- | --------- | ------------------ | ----- | ------------ |
+| Catarina Gonçalves    | 201906638 |up201906638@fe.up.pt| XX | XX% |
+| Deborah Lago  | 201806102 |up201806102@fe.up.pt| XX | XX% |
+| Diogo Sousa    | 201804265 |up201804265@fe.up.pt| XX | XX% |
+| Vasco Gomes    | 201906617 |up201906617@fe.up.pt| 20 | 60% |
+
+
+
+GLOBAL Grade of the project: 18
+
+ 
+## SUMMARY: (Describe what your tool does and its main features.)
+
+This project aims to apply knowledge from the Compilers’ course unit. To do that, we have created a compiler of Jmm language (a subset of Java). This compiler includes syntactic and semantic analysis and OLLIR and Jasmin code generation.
+
+
+## SEMANTIC ANALYSIS: (Refer the semantic rules implemented by your tool.)
+
+ 
+
+
+## CODE GENERATION: (describe how the code generation of your tool works and identify the possible problems your tool has regarding code generation.)
+
+ 
+
+ 
+## PROS: (Identify the most positive aspects of your tool)
+
+ 
+
+
+## CONS: (Identify the most negative aspects of your tool)
+
+
+
+
+
 ## Project setup
 
 There are three important subfolders inside the main folder. First, inside the subfolder named ``javacc`` you will find the initial grammar definition. Then, inside the subfolder named ``src`` you will find the entry point of the application. Finally, the subfolder named ``tutorial`` contains code solutions for each step of the tutorial. JavaCC21 will generate code inside the subfolder ``generated``.
