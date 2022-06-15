@@ -8,7 +8,7 @@ For this project, you need to install [Java](https://jdk.java.net/), [Gradle](ht
 | ---------------- | --------- | ------------------ | ----- | ------------ |
 | Catarina Gonçalves    | 201906638 |up201906638@fe.up.pt| 14 | 20% |
 | Deborah Lago  | 201806102 |up201806102@fe.up.pt| XX | XX% |
-| Diogo Sousa    | 201804265 |up201804265@fe.up.pt| XX | XX% |
+| Diogo Sousa    | 201804265 |up201804265@fe.up.pt| 12 | 10% |
 | Vasco Gomes    | 201906617 |up201906617@fe.up.pt| 20 | 60% |
 
 
