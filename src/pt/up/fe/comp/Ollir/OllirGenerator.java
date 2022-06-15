@@ -212,29 +212,49 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         Code lhs= visit(node.getJmmChild(0));
         Code rhs= visit(node.getJmmChild(1));
 
+
         thisCode.prefix = lhs.prefix;
         thisCode.prefix += rhs.prefix;
 
 
-        //assume its always a variable
         String methodSignature = OllirUtils.getParentMethod(node);
         String type="";
 
-        if(node.getJmmChild(0).getKind().equals("ArrayIndex"))
+        if(node.getJmmChild(0).getKind().equals("ArrayIndex")){
             type="i32";
+            boolean found = false;
+            for(Symbol symbol : symbolTable.getLocalVariables(methodSignature))
+            {
+            if(symbol.getName().equals(node.getJmmChild(0).getJmmChild(0).get("name")))
+                found = true;
+            }
+            if(!found){
+            for(Symbol symbol : symbolTable.getFields())
+            {
+                if(symbol.getName().equals(node.getJmmChild(0).getJmmChild(0).get("name")))
+                     return putfield(node.getJmmChild(0),node.getJmmChild(1));
+            }} 
+        }
         else
         {
+            boolean field = false;
+            boolean local = false;
         for(Symbol symbol : symbolTable.getFields())
         {
             if(symbol.getName().equals(node.getJmmChild(0).get("name")))
-                 type = OllirUtils.getCode(symbol.getType());
+                 {type = OllirUtils.getCode(symbol.getType());
+                field = true;}
         }
  
         for(Symbol symbol : symbolTable.getLocalVariables(methodSignature))
         {
             if(symbol.getName().equals(node.getJmmChild(0).get("name")))
-                 type = OllirUtils.getCode(symbol.getType());
+                 { type = OllirUtils.getCode(symbol.getType());
+                    local = true;
+                 } 
         }
+        if(field && !local)
+        return putfield(node.getJmmChild(0),node.getJmmChild(1));
         }
         if(!node.getJmmChild(1).getKind().equals("FTNew"))
             thisCode.code = lhs.code +" :=."+ type + " " + rhs.code;
@@ -247,8 +267,18 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
     }
 
 
+    private Code putfield(JmmNode left, JmmNode right) {
+        
+        Code lhs= visit(left,1);
+        Code rhs= visit(right,1);
 
+        Code thisCode = new Code();
+        thisCode.prefix = lhs.prefix;
+        thisCode.prefix += rhs.prefix;
 
+        thisCode.code = "putfield(this, "+lhs.code+", "+ rhs.code + ").V";
+        return thisCode;
+    }
 
     private Code binOpVisit(JmmNode node, Integer dummy){
         Code lhs = visit(node.getJmmChild(0));
@@ -261,7 +291,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         thisCode.prefix = lhs.prefix;
         thisCode.prefix += rhs.prefix;
 
-        if(!node.getJmmParent().getKind().equals("Assignment")){
+        if(!node.getJmmParent().getKind().equals("Assignment") || dummy!=null){
             String temp = createTemp(typeOp);
             thisCode.prefix += temp + " :="+typeOp + " " + lhs.code + " " + op + " " + rhs.code+";\n";
             thisCode.code = temp;
@@ -283,7 +313,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         Code thisCode = new Code();
         thisCode.prefix = lhs.prefix;
 
-        if(!node.getJmmParent().getKind().equals("Assignment")){
+        if(!node.getJmmParent().getKind().equals("Assignment")|| dummy !=null){
             String temp = createTemp(typeOp);
             thisCode.prefix += temp + " :="+typeOp + op + " " + lhs.code + ";\n";
             thisCode.code = temp;
@@ -313,13 +343,25 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
        for(Symbol symbol : symbolTable.getFields())
        {
            if(symbol.getName().equals(identifierName))
+           {
+            if(integer!=null)
                 code.code = OllirUtils.getCode(symbol);
+            else 
+            {
+            String type = OllirUtils.getCode(symbol.getType());
+            String temp = createTemp("."+type);
+            code.code=temp;
+            code.prefix=temp +" :=." + type+ " getfield(this, "+OllirUtils.getCode(symbol)+")."+type+";\n";
+            }
+           } 
        }
 
        for(Symbol symbol : symbolTable.getLocalVariables(methodSignature))
        {
            if(symbol.getName().equals(identifierName))
+           {    code.prefix="";
                 code.code = OllirUtils.getCode(symbol);
+           }
        }
 
         return code;
@@ -367,7 +409,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
 
 
         String name = node.getJmmChild(0).get("name");
-        if(!node.getJmmParent().getKind().equals("Assignment")){
+        if(!node.getJmmParent().getKind().equals("Assignment")|| integer!=null){
             String temp = createTemp("."+name);
             code.code=temp;
             code.prefix=temp +" :=." + name+ " new("+name+")."+name+";\n";
@@ -382,7 +424,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
     else
     {
         Code arrayLengthCode = visit(node.getJmmChild(0).getJmmChild(0));
-        if(!node.getJmmParent().getKind().equals("Assignment"))
+        if(!node.getJmmParent().getKind().equals("Assignment")|| integer!=null)
         {
             String temp = createTemp(".array.i32");
             code.prefix = arrayLengthCode.prefix;
@@ -468,7 +510,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
 
         String parentNodeKind = node.getJmmParent().getKind();
 
-        if(parentNodeKind.equals("MethodBody") || parentNodeKind.equals("CompoundStatement") || (parentNodeKind.equals("Assignment") && node.getJmmChild(1).getKind().equals("ArrayLength"))||parentNodeKind.equals("WhileStatement")||parentNodeKind.equals("IfStatement") || parentNodeKind.equals("ElseStatement")|| parentNodeKind.equals("Assignment")){
+        if(parentNodeKind.equals("MethodBody") || parentNodeKind.equals("CompoundStatement") || (parentNodeKind.equals("Assignment") && node.getJmmChild(1).getKind().equals("ArrayLength"))||parentNodeKind.equals("WhileStatement")||parentNodeKind.equals("IfStatement") || parentNodeKind.equals("ElseStatement")|| parentNodeKind.equals("Assignment")&&integer==null){
             
             thisCode.code = finalCode;
             thisCode.prefix = prefixCode;
@@ -538,7 +580,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         Code index = visit(node.getJmmChild(1));
         thisCode.prefix = index.prefix;
 
-        if(!node.getJmmParent().getKind().equals("Assignment")){
+        if(!node.getJmmParent().getKind().equals("Assignment") || integer!= null){
             String temp = createTemp(".i32");
             thisCode.prefix += temp + " :=.i32 " + targetName + "[" +index.code+"].i32;\n";
             thisCode.code = temp;
@@ -554,7 +596,7 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         int c = ++ifCount;
 
         for(JmmNode child : node.getChildren()){
-            Code vis = visit(child);
+            Code vis = visit(child,c);
             if (vis != null)
                 code.append(vis.prefix).append(vis.code).append(";\n");
         }
@@ -568,14 +610,14 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
         Code condition=visit(node.getJmmChild(0));
 
         code.append(condition.prefix);
-        code.append("if (" + condition.code+ ") goto IfBody"+ifCount+";\n");
-        code.append("goto ElseBody"+ifCount+";\n");
+        code.append("if (" + condition.code+ ") goto IfBody"+integer+";\n");
+        code.append("goto ElseBody"+integer+";\n");
 
        return null;
     }
 
     private Code IfStatementVisit(JmmNode node, Integer integer){
-        code.append("IfBody"+ifCount+":\n");
+        code.append("IfBody"+integer+":\n");
 
         for (JmmNode child : node.getChildren()){
             Code vis = visit(child);
@@ -583,13 +625,13 @@ public class OllirGenerator extends AJmmVisitor<Integer, Code> {
                 code.append(vis.prefix).append(vis.code).append(";\n");
         }
 
-        code.append("goto Endif").append(ifCount).append(";\n");
+        code.append("goto Endif").append(integer).append(";\n");
 
         return null;
     }
 
     private Code ElseStatementVisit(JmmNode node, Integer integer){
-        code.append("ElseBody"+ifCount+":\n");
+        code.append("ElseBody"+integer+":\n");
 
         for (JmmNode child : node.getChildren()){
             Code vis = visit(child);

@@ -67,37 +67,6 @@ public class OllirUtils {
         }
     }
 
-    //funçao para devolver o tipo através da expressao
-    public static String TypeExpress(String exprStmt){
-        String aux = "";
-        int index = exprStmt.lastIndexOf('.');
-
-        if(exprStmt.equals("")) return "";
-
-        if(exprStmt.length() > 6 && index > 5f){
-            if(exprStmt.startsWith("array", index-5)) aux += ".array";
-        }
-
-        return aux + "." + exprStmt.substring(index+1).trim().replaceAll("[() ;+<*/&\\-]", "");
-    }
-
-    public static String IdentifierExpress(String exprStmt) { 
-        String[] values = exprStmt.split("\\.");
-
-        if(values.length == 2) return values[0].trim();
-
-        if(values.length > 2){
-            int index = 1;
-            String removelast = values[values.length-2];
-
-            if(removelast.equals("array")) index = 2;
-
-            List<String> aux = new ArrayList<>(Arrays.asList(values).subList(0, values.length-index));
-            return String.join(".", aux);
-        }
-        return exprStmt;
-    }
-
     public static String getParentMethod(JmmNode node) {
 
         while(!node.getKind().equals("OtherMethodDeclaration") && !node.getKind().equals("MainMethodDeclaration"))

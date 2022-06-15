@@ -23,22 +23,58 @@ This project aims to apply knowledge from the Compilers’ course unit. To do th
 
 ## SEMANTIC ANALYSIS: (Refer the semantic rules implemented by your tool.)
 
- 
+### All requested rules were implemented:
+
+#### Symbol Table 
+
+- Has information about imports and the declared class 	
+- Has information about extends, fields and methods 
+- Has information about the parameters and local variables of each method (there is no method overloading in Jmm)
+	
+#### Type Verification 
+
+- Verify if variable names used in the code have a corresponding declaration, either as a local variable, a method parameter or a field of the class (if applicable).
+- Operands of an operation must types compatible with the operation (e.g. int + boolean is an error because + expects two integers.) 	
+- Array cannot be used in arithmetic operations (e.g. array1 + array2 is an error) 
+- Array access is done over an array 	
+- Array access index is an expression of type integer 
+- Type of the assignee must be compatible with the assigned (an_int = a_bool is an error) 
+- Expressions in conditions must return a boolean (if(2+3) is an error) 
+	 
+#### Function Verification 
+
+- When calling methodss of the class declared in the code, verify if the types of arguments of the call are compatible with the types in the method declaration 
+- In case the method does not exist, verify if the class extends another class and report an error if it does not. Assume the method exists in one of the super classes, and that is being correctly called 
+- When calling methods that belong to other classes other than the class declared in the code, verify if the classes are being imported 
+
+### Aditional rules implemented:
+
+- "this" can't be used on main
+- "length" can only be called on array variables
+- return values from function (assuming the values if extended/imported)
 
 
 ## CODE GENERATION: (describe how the code generation of your tool works and identify the possible problems your tool has regarding code generation.)
 
- 
+- The first step is to transform the source code into an abstract syntax tree (AST). The AST contains valuable information in each node that is used in later stages of code generation.
 
- 
+- After that and after doing the semantic analysis, we generate OLLIR code by visiting the generated AST. This is done with the main class OllirGenerator which uses useful functions in OllirUtils. We also use a class Code suggested by the teacher Tiago Carvalho that helps with the generation prefixes of a given instruction. The OLLIR code is generated as a String that will be used in the backend stage of the compiler
+
+- Finally, the OLLIR code is transformed into Jasmin code with the help of ClassUnit. We have unique files for each type of instruction and another file for useful functions, JasminUtils. The stack limit is updated in every instruction with the usage of the variables maxStack and currentStack. The locals limit is calculated by adding the number of local variables, the number of parameters and one more for "this"(if needed)
+
 ## PROS: (Identify the most positive aspects of your tool)
 
- 
+- We have done all that was required except for optimizations. All public tests pass with expected output code and expected reports.
 
+- We believe that our code is well organized and easy to understand.
 
 ## CONS: (Identify the most negative aspects of your tool)
 
 
+- Some keywords in Jasmin like "field" are not changed in our OLLIR code generation (We can't have a variable called "field" because of that)
+)
+- We did not implement the usage of arrays as fields of the main class in OLLIR. This is due to the lack of examples and information on how to do it. 
+- We did not implement any optimization apart from using some optimized instructions in Jasmin.
 
 
 
